@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#030309">
+<title>Scarica OcuLauncher · Server Minecraft VR — Oculandia VR</title>
+<meta name="description" content="Scarica OcuLauncher: installa e avvia Minecraft con tutte le mod di Oculandia VR automaticamente. Per Windows (anche ARM) e Mac (Intel e Apple Silicon).">
+<!-- ============================================================
+     IMPORTANTE: sostituisci l'username qui sotto (riga const REPO)
+     con il tuo username GitHub dopo aver creato il repo OcuLauncher.
+     ============================================================ -->
+<style>
+:root{
+  --bg:#030309; --panel:rgba(255,255,255,.035); --border:rgba(255,255,255,.09);
+  --text:#e9eef6; --muted:#8b9aac; --green:#37f06e; --cyan:#22d3ee;
+  --grad:linear-gradient(135deg,#37f06e 0%,#22d3ee 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(1200px 700px at 10% -10%, rgba(55,240,110,.10), transparent 60%),
+    radial-gradient(1000px 700px at 100% 0%, rgba(34,211,238,.10), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  line-height:1.6; min-height:100vh; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:48px 48px;mask-image:radial-gradient(circle at 50% 20%,#000,transparent 80%);
+}
+.wrap{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:clamp(24px,5vw,64px) clamp(18px,4vw,32px) 80px}
+.mono{font-family:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.tag{display:inline-block;font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;color:var(--green);border:1px solid var(--border);border-radius:999px;padding:6px 14px;background:rgba(55,240,110,.06)}
+header{text-align:center;margin-bottom:clamp(32px,6vw,56px)}
+.brand{font-weight:800;letter-spacing:.06em;font-size:clamp(1.1rem,3vw,1.4rem);margin:22px 0 10px}
+.brand b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{font-size:clamp(2rem,7vw,3.4rem);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:6px 0 14px}
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);max-width:600px;margin:0 auto;font-size:clamp(.95rem,2.4vw,1.05rem)}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:clamp(28px,5vw,44px) 0}
+section{margin:0 0 clamp(26px,4vw,38px)}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.sec-num{font-size:.75rem;letter-spacing:.2em;color:var(--cyan)}
+.sec-head h2{font-size:clamp(1.15rem,3.2vw,1.5rem);font-weight:700;letter-spacing:-.01em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px 20px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.card:hover{transform:translateY(-3px);border-color:rgba(55,240,110,.4);box-shadow:0 10px 34px rgba(0,0,0,.5)}
+.card h3{font-size:1.02rem;font-weight:700;margin-bottom:4px}
+.card p{color:var(--muted);font-size:.9rem;margin-bottom:12px}
+.note{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.22);border-radius:14px;padding:16px 20px;color:#cfeef7;font-size:.94rem}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:.92rem;padding:12px 20px;border-radius:12px;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,.05)}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:var(--grad);color:#04140a;border:none}
+.btn.primary:hover{box-shadow:0 10px 28px rgba(55,240,110,.32);filter:brightness(1.06)}
+.btn.big{font-size:1.05rem;padding:16px 30px;border-radius:14px}
+.btn[aria-disabled="true"]{opacity:.5;pointer-events:none}
+.hero-dl{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:26px 24px;text-align:center}
+.hero-dl .detected{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+.hero-dl .detected b{color:var(--green)}
+.hero-dl .ver{margin-top:12px;color:var(--muted);font-size:.82rem}
+.steps{color:var(--muted);font-size:.94rem}
+.steps li{margin:8px 0 8px 20px}
+.steps b{color:var(--text)}
+footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:clamp(40px,6vw,60px)}
+footer a{color:var(--cyan);text-decoration:none}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(55,240,110,.6);animation:p 2s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(55,240,110,.5)}70%{box-shadow:0 0 0 12px rgba(55,240,110,0)}100%{box-shadow:0 0 0 0 rgba(55,240,110,0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag mono">Download · OcuLauncher</span>
+    <div class="brand">OCULANDIA <b>VR</b></div>
+    <h1>Gioca su Oculandia <span>in un clic</span></h1>
+    <p class="sub">OcuLauncher installa da solo Minecraft nella versione giusta, con tutte le mod del server già configurate. Scegli le mod extra "quasi reale", accedi con Microsoft e premi GIOCA.</p>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- Download consigliato (auto-riconoscimento) -->
+  <section>
+    <div class="hero-dl">
+      <div class="detected" id="detected"><span class="pulse"></span> Rilevo il tuo sistema…</div>
+      <a class="btn primary big" id="dl-suggested" href="#tutti">⬇️ Scarica OcuLauncher</a>
+      <div class="ver" id="release-ver"></div>
+    </div>
+  </section>
+
+  <!-- Tutte le piattaforme -->
+  <section id="tutti">
+    <div class="sec-head"><span class="sec-num mono">01</span><h2>Tutte le versioni</h2></div>
+    <div class="grid">
+      <div class="card">
+        <h3>🪟 Windows</h3>
+        <p>PC con Intel o AMD (la maggior parte)</p>
+        <a class="btn" data-asset="win-x64" href="#">Scarica .exe</a>
+      </div>
+      <div class="card">
+        <h3>🪟 Windows ARM</h3>
+        <p>Surface e portatili con Snapdragon</p>
+        <a class="btn" data-asset="win-arm64" href="#">Scarica .exe (ARM64)</a>
+      </div>
+      <div class="card">
+        <h3>🍎 Mac Apple Silicon</h3>
+        <p>MacBook/iMac con chip M1, M2, M3, M4</p>
+        <a class="btn" data-asset="mac-arm64" href="#">Scarica .dmg</a>
+      </div>
+      <div class="card">
+        <h3>🍎 Mac Intel</h3>
+        <p>Mac più vecchi con processore Intel</p>
+        <a class="btn" data-asset="mac-x64" href="#">Scarica .dmg</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Primo avvio -->
+  <section>
+    <div class="sec-head"><span class="sec-num mono">02</span><h2>Al primo avvio</h2></div>
+    <div class="note">
+      <b>Windows:</b> se compare "PC protetto da Windows" → clicca <b>Ulteriori informazioni</b> → <b>Esegui comunque</b>.<br>
+      <b>Mac:</b> se l'app viene bloccata → <b>Impostazioni di Sistema → Privacy e Sicurezza</b> → in basso premi <b>"Apri comunque"</b> (sui Mac meno recenti: clic destro sull'app → Apri).<br>
+      È normale: succede perché il launcher è gratuito e non ha un certificato commerciale.
+    </div>
+  </section>
+
+  <!-- Requisiti -->
+  <section>
+    <div class="sec-head"><span class="sec-num mono">03</span><h2>Cosa ti serve</h2></div>
+    <ol class="steps">
+      <li>Un <b>account Microsoft con Minecraft Java Edition</b> (il login si fa nel launcher).</li>
+      <li>Almeno <b>6 GB di RAM</b> (8+ consigliati per shader e mod immersive — il launcher regola la memoria da solo).</li>
+      <li>Poi in gioco: <span class="mono">/register</span> la prima volta, e benvenuto su Oculandia!</li>
+    </ol>
+  </section>
+
+  <footer>
+    <span class="pulse"></span> Server: <span class="mono">minecraft.oculandiavr.it</span> ·
+    <a href="https://map.oculandiavr.it">Mappa</a> ·
+    <a href="/regole">Regole</a> ·
+    <a href="https://minecraft.oculandiavr.it">Oculandia VR</a>
+  </footer>
+</div>
+
+<script>
+/* ================================================================
+   CONFIG: metti qui "username/repo" del tuo GitHub dopo il push.
+   ================================================================ */
+const REPO = 'xcapsa/OcuLauncher';
+
+const RELEASES_PAGE = `https://github.com/${REPO}/releases/latest`;
+const SUFFIX = {
+  'win-x64':  (n) => /win-x64\.exe$/i.test(n),
+  'win-arm64':(n) => /win-arm64\.exe$/i.test(n),
+  'mac-x64':  (n) => /mac-x64\.dmg$/i.test(n),
+  'mac-arm64':(n) => /mac-arm64\.dmg$/i.test(n),
+};
+const LABELS = {
+  'win-x64': 'Windows (Intel/AMD)', 'win-arm64': 'Windows ARM',
+  'mac-x64': 'Mac Intel', 'mac-arm64': 'Mac Apple Silicon',
+};
+
+/* Rileva sistema e architettura del visitatore. */
+async function detectPlatform() {
+  const ua = navigator.userAgent;
+  const uad = navigator.userAgentData;
+  let os = /Mac/i.test(ua) ? 'mac' : /Win/i.test(ua) ? 'win' : null;
+  let arch = 'x64';
+  try {
+    if (uad && uad.getHighEntropyValues) {
+      const hi = await uad.getHighEntropyValues(['architecture', 'platform']);
+      if (hi.platform === 'macOS') os = 'mac';
+      if (hi.platform === 'Windows') os = 'win';
+      if (/arm/i.test(hi.architecture || '')) arch = 'arm64';
+    }
+  } catch (e) {}
+  if (os === 'mac') {
+    // Safari non espone l'architettura: la si deduce dalla GPU (Apple Mx).
+    try {
+      const gl = document.createElement('canvas').getContext('webgl');
+      const dbg = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      const ren = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '';
+      if (/Apple (M\d|GPU)/i.test(ren)) arch = 'arm64';
+    } catch (e) {}
+  }
+  return os ? os + '-' + arch : null;
+}
+
+async function init() {
+  const detected = await detectPlatform();
+  const detEl = document.getElementById('detected');
+  const suggested = document.getElementById('dl-suggested');
+
+  // Link dagli asset dell'ultima release GitHub
+  let assets = null, version = '';
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, { headers: { 'Accept': 'application/vnd.github+json' } });
+    if (r.ok) {
+      const rel = await r.json();
+      assets = rel.assets || [];
+      version = rel.tag_name || '';
+    }
+  } catch (e) {}
+
+  for (const [key, match] of Object.entries(SUFFIX)) {
+    const btn = document.querySelector(`[data-asset="${key}"]`);
+    const asset = assets && assets.find((a) => match(a.name));
+    if (asset) {
+      btn.href = asset.browser_download_url;
+      const mb = Math.round(asset.size / 1e6);
+      btn.textContent = btn.textContent.replace(/\s*\(\d+ MB\)$/, '') + ` (${mb} MB)`;
+    } else {
+      btn.href = RELEASES_PAGE; // fallback: pagina release
+    }
+  }
+
+  document.getElementById('release-ver').textContent =
+    version ? `Ultima versione: ${version} · gratis, open e senza pubblicità` : '';
+
+  if (REPO.includes('OCULANDIA_GITHUB_USER') && !assets) {
+    // Repo non ancora configurato: niente release da linkare.
+    detEl.innerHTML = 'I download saranno disponibili a breve — torna a trovarci!';
+    suggested.setAttribute('aria-disabled', 'true');
+    suggested.textContent = '⏳ Release in preparazione';
+    document.querySelectorAll('[data-asset]').forEach((b) => b.setAttribute('aria-disabled', 'true'));
+    return;
+  }
+  if (detected && LABELS[detected]) {
+    detEl.innerHTML = `<span class="pulse"></span> Sistema rilevato: <b>${LABELS[detected]}</b>`;
+    const asset = assets && assets.find((a) => SUFFIX[detected](a.name));
+    suggested.href = asset ? asset.browser_download_url : RELEASES_PAGE;
+    suggested.textContent = `⬇️ Scarica per ${LABELS[detected]}`;
+  } else {
+    detEl.innerHTML = 'Scegli qui sotto la versione per il tuo computer.';
+    suggested.href = '#tutti';
+  }
+}
+init();
+</script>
+</body>
+</html>
