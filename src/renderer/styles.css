@@ -112,6 +112,30 @@ body {
   font-size: 12px;
   cursor: pointer;
 }
+
+/* Edizione Staff: campo nome utente locale */
+#local-box { display: flex; align-items: center; gap: 12px; }
+.local-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: var(--grad);
+  color: #041b10;
+  border-radius: 6px;
+  padding: 4px 9px;
+}
+#local-username {
+  background: #0d1730;
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px 13px;
+  font-size: 15px;
+  width: 230px;
+  outline: none;
+}
+#local-username:focus { border-color: var(--green); }
+#local-username.invalid { border-color: var(--danger); }
 .btn-small:hover { background: #22d3ee22; }
 
 #content {

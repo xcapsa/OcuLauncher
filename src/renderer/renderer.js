@@ -145,18 +145,60 @@ async function init() {
   renderExtras();
   updateAutoRamLabel();
 
-  setProfile(null);
-  setStatus('Accesso in corso…');
-  const profile = await ocu.silentLogin();
-  if (profile) {
-    setProfile(profile);
-    setStatus('Bentornato, ' + profile.name + '!');
+  if (state.edition === 'staff') {
+    initStaff(s);
   } else {
-    setStatus('Accedi con il tuo account Microsoft per giocare.');
+    $('launcher-version').textContent = `OcuLauncher v${state.version}`;
+    setProfile(null);
+    setStatus('Accesso in corso…');
+    const profile = await ocu.silentLogin();
+    if (profile) {
+      setProfile(profile);
+      setStatus('Bentornato, ' + profile.name + '!');
+    } else {
+      setStatus('Accedi con il tuo account Microsoft per giocare.');
+    }
   }
 
   refreshPing();
   setInterval(refreshPing, 30000);
+}
+
+/* ---- Edizione Staff: accesso locale con nome utente ---- */
+
+function validUsername(name) {
+  return /^[A-Za-z0-9_]{3,16}$/.test(name);
+}
+
+function initStaff(s) {
+  document.title = 'OcuLauncher Staff';
+  $('launcher-version').textContent = `OcuLauncher Staff v${state.version}`;
+  $('account-box').style.display = 'none';
+  $('local-box').style.display = '';
+  $('news').textContent = state.manifest.news
+    || 'Accesso locale (staff): scegli un nome, poi in gioco /register o /login (EasyAuth).';
+
+  const input = $('local-username');
+  input.value = s.localUsername || '';
+
+  const refresh = () => {
+    const name = input.value.trim();
+    const ok = validUsername(name);
+    input.classList.toggle('invalid', name.length > 0 && !ok);
+    $('local-hint').textContent = ok
+      ? 'Pronto. In gioco: /register <password> alla prima volta.'
+      : (name.length ? '3-16 caratteri: lettere, numeri, underscore.' : 'Scrivi il nome con cui entrerai.');
+    $('btn-play').disabled = !ok || gameState !== 'idle';
+    return ok;
+  };
+
+  input.addEventListener('input', refresh);
+  input.addEventListener('change', async () => {
+    if (validUsername(input.value.trim())) await ocu.setLocalUsername(input.value.trim());
+  });
+
+  if (refresh()) setStatus('Bentornato, ' + input.value.trim() + '! Premi GIOCA.');
+  else setStatus('Inserisci il nome utente con cui vuoi entrare.');
 }
 
 /* ---- Eventi UI ---- */
@@ -181,6 +223,13 @@ $('btn-auth').addEventListener('click', async () => {
 });
 
 $('btn-play').addEventListener('click', async () => {
+  // Edizione Staff: salva il nome utente prima di avviare (anche se non ha perso focus).
+  if (state && state.edition === 'staff') {
+    const name = $('local-username').value.trim();
+    if (!validUsername(name)) { setStatus('Nome utente non valido.'); return; }
+    const res = await ocu.setLocalUsername(name);
+    if (!res.ok) { setStatus('Errore: ' + res.error); return; }
+  }
   $('btn-play').disabled = true;
   const r = await ocu.play();
   if (!r.ok) {
@@ -235,7 +284,9 @@ ocu.onStatus(({ text, progress }) => setStatus(text, progress));
 ocu.onGameState((gs) => {
   gameState = gs;
   if (gs === 'idle') {
-    $('btn-play').disabled = false;
+    // In edizione Staff il GIOCA resta disattivo finché il nome utente non è valido.
+    const staffBlocked = state && state.edition === 'staff' && !validUsername(($('local-username').value || '').trim());
+    $('btn-play').disabled = staffBlocked;
     $('btn-play').textContent = 'GIOCA';
     $('progress-bar').style.width = '0%';
   } else if (gs === 'preparing') {
