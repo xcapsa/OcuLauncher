@@ -6,7 +6,14 @@ const { Settings } = require('./settings');
 const { Account } = require('./auth');
 const { getManifest, launchGame, computeAutoRam } = require('./launcher');
 const { pingServer } = require('./serverping');
+const { isValidUsername, localAuthorization } = require('./localauth');
 const os = require('os');
+
+// Edizione del launcher: "microsoft" (pubblica) o "staff" (accesso locale).
+// Impostata a build-time scrivendo src/edition.json.
+let EDITION = 'microsoft';
+try { EDITION = (require('../edition.json').edition || 'microsoft'); } catch (_) {}
+const IS_STAFF = EDITION === 'staff';
 
 // Piccola cache in memoria per non riscaricare il manifest a ogni chiamata IPC.
 let manifestCache = null;
@@ -23,7 +30,9 @@ let settings = null;
 let account = null;
 let gameRunning = false;
 
-const gameDir = () => path.join(app.getPath('appData'), 'OcuLauncher', 'minecraft');
+// Cartella dati separata per edizione (Staff non condivide identità/mondo con la pubblica).
+const DATA_FOLDER = IS_STAFF ? 'OcuLauncher-Staff' : 'OcuLauncher';
+const gameDir = () => path.join(app.getPath('appData'), DATA_FOLDER, 'minecraft');
 
 /* ------------------------------------------------------------------ */
 
@@ -33,7 +42,7 @@ function createWindow() {
     height: 660,
     minWidth: 860,
     minHeight: 560,
-    title: 'OcuLauncher — Oculandia VR',
+    title: IS_STAFF ? 'OcuLauncher Staff — Accesso locale' : 'OcuLauncher — Oculandia VR',
     icon: path.join(__dirname, '..', 'renderer', 'icon.png'),
     backgroundColor: '#0b1220',
     show: false,
@@ -91,11 +100,23 @@ function registerIpc() {
       systemRamMB: Math.round(os.totalmem() / (1024 * 1024)),
       autoRamMB: computeAutoRam(manifest, settings.get().extraMods),
       version: app.getVersion(),
+      edition: EDITION,
       links: { website: config.WEBSITE_URL, map: config.MAP_URL, rules: config.RULES_URL },
     };
   });
 
+  // Edizione Staff: imposta/valida il nome utente locale (nessun account Microsoft).
+  ipcMain.handle('set-local-username', (_ev, name) => {
+    const trimmed = (name || '').trim();
+    if (!isValidUsername(trimmed)) {
+      return { ok: false, error: 'Nome non valido: 3-16 caratteri tra lettere, numeri e underscore.' };
+    }
+    settings.set({ localUsername: trimmed });
+    return { ok: true, name: trimmed };
+  });
+
   ipcMain.handle('silent-login', async () => {
+    if (IS_STAFF) return null; // edizione Staff: nessun login Microsoft
     // Timeout: se la rete è lenta non teniamo l'interfaccia in "Accesso in corso" per sempre.
     return Promise.race([
       account.trySilentLogin(),
@@ -134,7 +155,17 @@ function registerIpc() {
 
   ipcMain.handle('play', async () => {
     if (gameRunning) return { ok: false, error: 'Il gioco è già in esecuzione.' };
-    if (!account.profile) return { ok: false, error: 'Fai prima il login.' };
+    // Autorizzazione: Microsoft (pubblica) oppure locale offline (Staff).
+    let authorization;
+    if (IS_STAFF) {
+      const name = (settings.get().localUsername || '').trim();
+      if (!isValidUsername(name)) return { ok: false, error: 'Inserisci prima un nome utente valido.' };
+      try { authorization = localAuthorization(name); }
+      catch (e) { return { ok: false, error: String(e && e.message || e) }; }
+    } else {
+      if (!account.profile) return { ok: false, error: 'Fai prima il login.' };
+      authorization = account.mclcAuth();
+    }
     gameRunning = true;
     sendGameState('preparing');
     try {
@@ -145,7 +176,7 @@ function registerIpc() {
       const launcher = await launchGame({
         gameDir: gameDir(),
         manifest,
-        authorization: account.mclcAuth(),
+        authorization,
         settings: settings.get(),
         onStatus: sendStatus,
       });
@@ -220,7 +251,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
-    const userData = path.join(app.getPath('appData'), 'OcuLauncher');
+    const userData = path.join(app.getPath('appData'), DATA_FOLDER);
     settings = new Settings(userData);
     account = new Account(userData);
     registerIpc();

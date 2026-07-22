@@ -9,6 +9,7 @@ const DEFAULTS = {
   keepOpen: false,    // se true il launcher resta visibile mentre giochi
   autoJoin: true,     // entra direttamente nel server Oculandia
   extraMods: [],      // slug delle mod opzionali "esperienza immersiva" scelte
+  localUsername: '',  // solo edizione Staff: ultimo nome utente usato
 };
 
 class Settings {
