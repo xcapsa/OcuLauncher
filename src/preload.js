@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('ocu', {
   login: () => ipcRenderer.invoke('login'),
   logout: () => ipcRenderer.invoke('logout'),
   setSettings: (patch) => ipcRenderer.invoke('set-settings', patch),
+  setLocalUsername: (name) => ipcRenderer.invoke('set-local-username', name),
   getAutoRam: () => ipcRenderer.invoke('get-auto-ram'),
   pingServer: () => ipcRenderer.invoke('ping-server'),
   play: () => ipcRenderer.invoke('play'),
