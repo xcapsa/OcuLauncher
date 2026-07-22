@@ -1,0 +1,472 @@
+{
+  "_comment": "Manifest OcuLauncher — modifica questo file sul VPS per aggiornare le mod di tutti i giocatori. Il launcher lo scarica a ogni avvio.",
+  "manifestVersion": 1,
+  "minecraft": "1.21.5",
+  "fabricLoader": "0.19.3",
+  "javaMajor": 21,
+  "server": {
+    "host": "minecraft.oculandiavr.it",
+    "port": 25565
+  },
+  "news": "Benvenuto su Oculandia VR! Ricordati di registrarti in gioco con /register la prima volta.",
+  "mods": [
+    {
+      "name": "Fabric API",
+      "filename": "fabric-api-0.128.2+1.21.5.jar",
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/kKEGlsne/fabric-api-0.128.2%2B1.21.5.jar",
+      "sha1": "920dea0ac4ff08f539099215eace9fda3e3fb2e3",
+      "size": 2248994,
+      "tags": []
+    },
+    {
+      "name": "Sodium",
+      "filename": "sodium-fabric-0.6.13+mc1.21.5.jar",
+      "url": "https://cdn.modrinth.com/data/AANobbMI/versions/DA250htH/sodium-fabric-0.6.13%2Bmc1.21.5.jar",
+      "sha1": "6a7132ea86653541fa53ef88c764c8ac0cde81cc",
+      "size": 1336477,
+      "tags": []
+    },
+    {
+      "name": "Lithium",
+      "filename": "lithium-fabric-0.16.3+mc1.21.5.jar",
+      "url": "https://cdn.modrinth.com/data/gvQqBUqZ/versions/xcELvp6R/lithium-fabric-0.16.3%2Bmc1.21.5.jar",
+      "sha1": "eaa7ef4e1dba9006dd216bb310eb8ec3dccd84bc",
+      "size": 791052,
+      "tags": []
+    },
+    {
+      "name": "FerriteCore",
+      "filename": "ferritecore-8.0.4-fabric.jar",
+      "url": "https://cdn.modrinth.com/data/uXXizFIs/versions/LdlksamY/ferritecore-8.0.4-fabric.jar",
+      "sha1": "974662c047d5eaa34d372be09409b8b754c223f4",
+      "size": 82475,
+      "tags": []
+    },
+    {
+      "name": "ImmediatelyFast",
+      "filename": "ImmediatelyFast-Fabric-1.9.7+1.21.5.jar",
+      "url": "https://cdn.modrinth.com/data/5ZwdcRci/versions/AJh4ziDx/ImmediatelyFast-Fabric-1.9.7%2B1.21.5.jar",
+      "sha1": "7bc7380cbae85467d3f264d6a88dee77473bcdf5",
+      "size": 228032,
+      "tags": []
+    },
+    {
+      "name": "Entity Culling",
+      "filename": "entityculling-fabric-1.10.5-mc1.21.5.jar",
+      "url": "https://cdn.modrinth.com/data/NNAgCjsB/versions/cszIhMU3/entityculling-fabric-1.10.5-mc1.21.5.jar",
+      "sha1": "e6400006c6463855f739fb7780603f08f18be545",
+      "size": 1596245,
+      "tags": []
+    },
+    {
+      "name": "Simple Voice Chat",
+      "filename": "voicechat-fabric-1.21.5-2.6.21.jar",
+      "url": "https://cdn.modrinth.com/data/9eGKb6K1/versions/1UWcBhXZ/voicechat-fabric-1.21.5-2.6.21.jar",
+      "sha1": "8427bd2fa612c292c39bcee9f2fc0337293506f6",
+      "size": 5461642,
+      "tags": []
+    },
+    {
+      "name": "Vivecraft",
+      "filename": "vivecraft-1.21.5-1.3.15-fabric.jar",
+      "url": "https://cdn.modrinth.com/data/wGoQDPN5/versions/KbCpEFz2/vivecraft-1.21.5-1.3.15-fabric.jar",
+      "sha1": "b136f04b091ae7dd74a4574c8230c096e728d495",
+      "size": 6002396,
+      "tags": [
+        "vr"
+      ]
+    }
+  ],
+  "optionalMods": [
+    {
+      "slug": "iris",
+      "name": "Iris Shaders",
+      "desc": "Shader realistici (luci, ombre, acqua)",
+      "category": "grafica",
+      "heavy": false,
+      "type": "mod",
+      "version": "1.8.11+1.21.5-fabric",
+      "files": [
+        {
+          "filename": "iris-fabric-1.8.11+mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/YL57xq9U/versions/U6evbjd0/iris-fabric-1.8.11%2Bmc1.21.5.jar",
+          "sha1": "3806a7c76347bcfd9f02b1317a5ddd1541bd24a7",
+          "size": 2714605,
+          "of": "Iris Shaders"
+        }
+      ],
+      "requires": [
+        "complementary-reimagined"
+      ]
+    },
+    {
+      "slug": "continuity",
+      "name": "Continuity",
+      "desc": "Vetri e blocchi connessi senza bordi",
+      "category": "grafica",
+      "heavy": false,
+      "type": "mod",
+      "version": "3.0.1-test.4+1.21.5",
+      "files": [
+        {
+          "filename": "continuity-3.0.1-test.4+1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/1IjD5062/versions/kravz06U/continuity-3.0.1-test.4%2B1.21.5.jar",
+          "sha1": "9965153e0acabbe3582aabe2ddb6a503508b6787",
+          "size": 996045,
+          "of": "Continuity"
+        }
+      ]
+    },
+    {
+      "slug": "lambdynamiclights",
+      "name": "LambDynamicLights - Dynamic Lights",
+      "desc": "Luce dinamica da torce in mano",
+      "category": "grafica",
+      "heavy": false,
+      "type": "mod",
+      "version": "4.8.7+1.21.5",
+      "files": [
+        {
+          "filename": "lambdynamiclights-4.8.7+1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/yBW8D80W/versions/1DmwErAj/lambdynamiclights-4.8.7%2B1.21.5.jar",
+          "sha1": "d2ee6b34245155f56ab4d48f1346839bbd470bb1",
+          "size": 1990618,
+          "of": "LambDynamicLights - Dynamic Lights"
+        }
+      ]
+    },
+    {
+      "slug": "fallingleaves",
+      "name": "Falling Leaves",
+      "desc": "Foglie che cadono dagli alberi",
+      "category": "grafica",
+      "heavy": false,
+      "type": "mod",
+      "version": "2.0.1+1.21.5",
+      "files": [
+        {
+          "filename": "fallingleaves-2.0.1+1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/WhbRG4iK/versions/Fee5709g/fallingleaves-2.0.1%2B1.21.5.jar",
+          "sha1": "62455a348fcb23895c05a8dc725de829b3ffeab2",
+          "size": 181669,
+          "of": "Falling Leaves"
+        },
+        {
+          "filename": "cloth-config-18.0.145-fabric.jar",
+          "url": "https://cdn.modrinth.com/data/9s6osm5g/versions/qA00xo1O/cloth-config-18.0.145-fabric.jar",
+          "sha1": "db73460f84cede7b5fc67dce7c38bbeb5444c63e",
+          "size": 1152219,
+          "of": "Cloth Config API (libreria)"
+        }
+      ]
+    },
+    {
+      "slug": "visuality",
+      "name": "Visuality",
+      "desc": "Particelle extra (scintille, cristalli)",
+      "category": "grafica",
+      "heavy": false,
+      "type": "mod",
+      "version": "0.7.10+1.21.5",
+      "files": [
+        {
+          "filename": "visuality-0.7.10+1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/rI0hvYcd/versions/W7vlELm0/visuality-0.7.10%2B1.21.5.jar",
+          "sha1": "4631dfea9da3c95ca69a331bb6fc1d4b21ba12e1",
+          "size": 80841,
+          "of": "Visuality"
+        },
+        {
+          "filename": "cloth-config-18.0.145-fabric.jar",
+          "url": "https://cdn.modrinth.com/data/9s6osm5g/versions/qA00xo1O/cloth-config-18.0.145-fabric.jar",
+          "sha1": "db73460f84cede7b5fc67dce7c38bbeb5444c63e",
+          "size": 1152219,
+          "of": "Cloth Config API (libreria)"
+        }
+      ]
+    },
+    {
+      "slug": "particle-rain",
+      "name": "Particle Rain",
+      "desc": "Pioggia e neve con particelle realistiche",
+      "category": "grafica",
+      "heavy": false,
+      "type": "mod",
+      "version": "3.3.5",
+      "files": [
+        {
+          "filename": "particle-rain-3.3.5.jar",
+          "url": "https://cdn.modrinth.com/data/nrikgvxm/versions/zU0KyNqy/particle-rain-3.3.5.jar",
+          "sha1": "683fb172939ab6c36fd2379ad886c1271b0002b1",
+          "size": 546557,
+          "of": "Particle Rain"
+        },
+        {
+          "filename": "yet_another_config_lib_v3-3.8.2+1.21.5-fabric.jar",
+          "url": "https://cdn.modrinth.com/data/1eAoo2KR/versions/oReM1Qvh/yet_another_config_lib_v3-3.8.2%2B1.21.5-fabric.jar",
+          "sha1": "6a1ef85842064a98eff99f2fd72754be3a469eeb",
+          "size": 1130747,
+          "of": "YetAnotherConfigLib (YACL) (libreria)"
+        }
+      ]
+    },
+    {
+      "slug": "distanthorizons",
+      "name": "Distant Horizons",
+      "desc": "Vedi il mondo a chilometri di distanza (LOD)",
+      "category": "mondo",
+      "heavy": true,
+      "type": "mod",
+      "version": "3.2.0-b-1.21.5",
+      "files": [
+        {
+          "filename": "DistantHorizons-3.2.0-b-1.21.5-fabric-neoforge.jar",
+          "url": "https://cdn.modrinth.com/data/uCdwusMi/versions/3b19d4Um/DistantHorizons-3.2.0-b-1.21.5-fabric-neoforge.jar",
+          "sha1": "53188d5ba3c1f8c4b9e73be789544ac49d700c3b",
+          "size": 30067555,
+          "of": "Distant Horizons"
+        }
+      ]
+    },
+    {
+      "slug": "physicsmod",
+      "name": "Physics Mod",
+      "desc": "Fisica realistica di blocchi e neve",
+      "category": "mondo",
+      "heavy": true,
+      "type": "mod",
+      "version": "3.1.8",
+      "files": [
+        {
+          "filename": "physics-mod-3.1.8-mc-1.21.5-fabric.jar",
+          "url": "https://cdn.modrinth.com/data/Xy8aRQKS/versions/AHrXzQdA/physics-mod-3.1.8-mc-1.21.5-fabric.jar",
+          "sha1": "d16a891c7fbed58d43dcb17fc2577fa08dc66df6",
+          "size": 62579297,
+          "of": "Physics Mod"
+        }
+      ]
+    },
+    {
+      "slug": "entity-model-features",
+      "name": "Entity Model Features",
+      "desc": "Modelli animati delle creature (per Fresh Animations)",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "mod",
+      "version": "3.2.4-fabric-1.21.5",
+      "files": [
+        {
+          "filename": "entity_model_features-3.2.4-1.21.5-fabric.jar",
+          "url": "https://cdn.modrinth.com/data/4I1XuqiY/versions/rQNlzjgl/entity_model_features-3.2.4-1.21.5-fabric.jar",
+          "sha1": "ba71441d4db9787be7d1dd2e67d8bf756687b177",
+          "size": 575180,
+          "of": "[EMF] Entity Model Features"
+        },
+        {
+          "filename": "entity_texture_features_1.21.5-fabric-7.1.jar",
+          "url": "https://cdn.modrinth.com/data/BVzZfTc1/versions/hZDlrBqm/entity_texture_features_1.21.5-fabric-7.1.jar",
+          "sha1": "37343dba56b4c3c292371a26e2ff02d5db6cb586",
+          "size": 747639,
+          "of": "[ETF] Entity Texture Features (libreria)"
+        }
+      ]
+    },
+    {
+      "slug": "entitytexturefeatures",
+      "name": "Entity Texture Features",
+      "desc": "Texture avanzate delle creature",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "mod",
+      "version": "7.1-fabric-1.21.5",
+      "files": [
+        {
+          "filename": "entity_texture_features_1.21.5-fabric-7.1.jar",
+          "url": "https://cdn.modrinth.com/data/BVzZfTc1/versions/hZDlrBqm/entity_texture_features_1.21.5-fabric-7.1.jar",
+          "sha1": "37343dba56b4c3c292371a26e2ff02d5db6cb586",
+          "size": 747639,
+          "of": "[ETF] Entity Texture Features"
+        }
+      ]
+    },
+    {
+      "slug": "not-enough-animations",
+      "name": "Not Enough Animations",
+      "desc": "Animazioni del corpo in terza persona",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "mod",
+      "version": "1.12.4",
+      "files": [
+        {
+          "filename": "notenoughanimations-fabric-1.12.4-mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/MPCX6s5C/versions/yZG7xti8/notenoughanimations-fabric-1.12.4-mc1.21.5.jar",
+          "sha1": "4140976acce445a02d12be906623e3cefab07beb",
+          "size": 1951029,
+          "of": "Not Enough Animations"
+        }
+      ]
+    },
+    {
+      "slug": "3dskinlayers",
+      "name": "3D Skin Layers",
+      "desc": "Skin in 3D (cappucci, vestiti)",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "mod",
+      "version": "1.11.2",
+      "files": [
+        {
+          "filename": "skinlayers3d-fabric-1.11.2-mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/zV5r3pPn/versions/F7gPzIo2/skinlayers3d-fabric-1.11.2-mc1.21.5.jar",
+          "sha1": "ff80213079062dfd45d71f761c59f6c5850e0d64",
+          "size": 1982852,
+          "of": "3D Skin Layers"
+        }
+      ]
+    },
+    {
+      "slug": "first-person-model",
+      "name": "First-person Model",
+      "desc": "Vedi il tuo corpo in prima persona",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "mod",
+      "version": "2.7.2",
+      "files": [
+        {
+          "filename": "firstperson-fabric-2.7.2-mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/H5XMjpHi/versions/EY7QWlqG/firstperson-fabric-2.7.2-mc1.21.5.jar",
+          "sha1": "b133ec47aa50cd51f876225e987f190e6433d426",
+          "size": 1620390,
+          "of": "First-person Model"
+        },
+        {
+          "filename": "notenoughanimations-fabric-1.12.4-mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/MPCX6s5C/versions/yZG7xti8/notenoughanimations-fabric-1.12.4-mc1.21.5.jar",
+          "sha1": "4140976acce445a02d12be906623e3cefab07beb",
+          "size": 1951029,
+          "of": "Not Enough Animations (libreria)"
+        }
+      ]
+    },
+    {
+      "slug": "wavey-capes",
+      "name": "Wavey Capes",
+      "desc": "Mantelli che ondeggiano",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "mod",
+      "version": "1.10.2",
+      "files": [
+        {
+          "filename": "waveycapes-fabric-1.10.2-mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/kYuIpRLv/versions/nOd5yUAn/waveycapes-fabric-1.10.2-mc1.21.5.jar",
+          "sha1": "91d351999ee899b0995fc79738b4dc191a4d4906",
+          "size": 1856833,
+          "of": "Wavey Capes"
+        }
+      ]
+    },
+    {
+      "slug": "sound-physics-remastered",
+      "name": "Sound Physics Remastered",
+      "desc": "Eco e riverbero realistici (caverne!)",
+      "category": "audio",
+      "heavy": false,
+      "type": "mod",
+      "version": "fabric-1.21.5-1.5.1",
+      "files": [
+        {
+          "filename": "sound-physics-remastered-fabric-1.21.5-1.5.1.jar",
+          "url": "https://cdn.modrinth.com/data/qyVF9oeo/versions/VvbAHIWf/sound-physics-remastered-fabric-1.21.5-1.5.1.jar",
+          "sha1": "8dea56f5847a4dbcf1ac346df66c4b2d155a8dd7",
+          "size": 206483,
+          "of": "Sound Physics Remastered"
+        }
+      ]
+    },
+    {
+      "slug": "presence-footsteps",
+      "name": "Presence Footsteps",
+      "desc": "Suoni dei passi realistici per ogni blocco",
+      "category": "audio",
+      "heavy": false,
+      "type": "mod",
+      "version": "1.11.2+1.21.5",
+      "files": [
+        {
+          "filename": "PresenceFootsteps-1.11.2+1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/rcTfTZr3/versions/kEumLo5Q/PresenceFootsteps-1.11.2%2B1.21.5.jar",
+          "sha1": "029ceb7f9c67fbe89fcfeff23fd8d80f229990ed",
+          "size": 5694121,
+          "of": "Presence Footsteps"
+        }
+      ]
+    },
+    {
+      "slug": "ambientsounds",
+      "name": "AmbientSounds",
+      "desc": "Suoni ambientali (uccelli, vento, grilli)",
+      "category": "audio",
+      "heavy": false,
+      "type": "mod",
+      "version": "6.1.9",
+      "files": [
+        {
+          "filename": "AmbientSounds_FABRIC_v6.1.9_mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/fM515JnW/versions/nnNIkaxO/AmbientSounds_FABRIC_v6.1.9_mc1.21.5.jar",
+          "sha1": "3d283fc47f58414d1df2e41cb213fa98ac570333",
+          "size": 84869062,
+          "of": "AmbientSounds"
+        },
+        {
+          "filename": "CreativeCore_FABRIC_v2.13.4_mc1.21.5.jar",
+          "url": "https://cdn.modrinth.com/data/OsZiaDHq/versions/UqagoK0C/CreativeCore_FABRIC_v2.13.4_mc1.21.5.jar",
+          "sha1": "ca4d77855de90ca2342ff78bf5235a0217f7f008",
+          "size": 1245089,
+          "of": "CreativeCore (libreria)"
+        }
+      ]
+    },
+    {
+      "slug": "complementary-reimagined",
+      "name": "Complementary Reimagined",
+      "desc": "Il pacchetto shader più amato: attivalo in gioco (Opzioni Video → Pacchetti Shader)",
+      "category": "grafica",
+      "heavy": false,
+      "type": "shaderpack",
+      "version": "r5.8.1",
+      "files": [
+        {
+          "filename": "ComplementaryReimagined_r5.8.1.zip",
+          "url": "https://cdn.modrinth.com/data/HVnmMxH1/versions/yCCduG44/ComplementaryReimagined_r5.8.1.zip",
+          "sha1": "5a021081f0178ed91dd911194071465ab0a4348b",
+          "size": 546925
+        }
+      ]
+    },
+    {
+      "slug": "fresh-animations",
+      "name": "Fresh Animations",
+      "desc": "Animazioni realistiche delle creature: attivalo in gioco (Opzioni → Pacchetti Risorse). Richiede EMF+ETF",
+      "category": "animazioni",
+      "heavy": false,
+      "type": "resourcepack",
+      "version": "1.10.4",
+      "requires": [
+        "entity-model-features",
+        "entitytexturefeatures"
+      ],
+      "files": [
+        {
+          "filename": "FreshAnimations_v1.10.4.zip",
+          "url": "https://cdn.modrinth.com/data/50dA9Sha/versions/xN57JJts/FreshAnimations_v1.10.4.zip",
+          "sha1": "73db740a6868e043c5e615c036fca2c912615b6e",
+          "size": 850941
+        }
+      ]
+    }
+  ],
+  "_commentOptional": "optionalMods: mod facoltative scelte dal giocatore nel launcher (esperienza immersiva). type: mod|shaderpack|resourcepack. heavy: consigliata solo per PC potenti. requires: slug auto-inclusi."
+}
