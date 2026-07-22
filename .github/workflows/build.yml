@@ -1,0 +1,38 @@
+name: Build OcuLauncher
+
+# Parte quando pubblichi un tag tipo v1.0.0 (oppure a mano da Actions → Run workflow).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # per caricare gli installer nella Release
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest   # produce .exe per x64 e ARM64
+            args: --win --x64 --arm64
+          - os: macos-latest     # produce .dmg per Intel e Apple Silicon
+            args: --mac --x64 --arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installa dipendenze
+        run: npm ci
+
+      - name: Compila e pubblica nella Release
+        run: npx electron-builder ${{ matrix.args }} --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Su macOS senza certificato Apple: nessuna firma/notarizzazione.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
