@@ -1,0 +1,37 @@
+appId: it.oculandiavr.oculauncher
+productName: OcuLauncher
+copyright: © Oculandia VR
+directories:
+  buildResources: build
+  output: dist
+files:
+  - src/**/*
+  - package.json
+asar: true
+
+publish:
+  provider: github
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+nsis:
+  oneClick: true
+  perMachine: false
+  allowElevation: true
+  deleteAppDataOnUninstall: false
+  artifactName: OcuLauncher-Setup-${version}-win-${arch}.${ext}
+  shortcutName: OcuLauncher
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.games
+  identity: null   # niente firma Apple: gli utenti aprono con clic destro → Apri
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+dmg:
+  artifactName: OcuLauncher-${version}-mac-${arch}.${ext}
+  title: OcuLauncher ${version}
