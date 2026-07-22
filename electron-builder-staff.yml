@@ -1,0 +1,39 @@
+appId: it.oculandiavr.oculauncher.staff
+productName: "OcuLauncher Staff"
+copyright: © Oculandia VR
+directories:
+  buildResources: build
+  output: dist
+files:
+  - src/**/*
+  - package.json
+asar: true
+afterPack: build/afterPack.js
+
+publish:
+  provider: github
+  releaseType: prerelease
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+nsis:
+  oneClick: true
+  perMachine: false
+  allowElevation: true
+  deleteAppDataOnUninstall: false
+  artifactName: OcuLauncher-Staff-Setup-${version}-win-${arch}.${ext}
+  shortcutName: OcuLauncher Staff
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.games
+  identity: null   # niente firma Apple: gli utenti aprono con clic destro → Apri
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+dmg:
+  artifactName: OcuLauncher-Staff-${version}-mac-${arch}.${ext}
+  title: OcuLauncher Staff ${version}
