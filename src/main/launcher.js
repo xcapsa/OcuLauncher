@@ -5,6 +5,7 @@ const os = require('os');
 const { Client } = require('minecraft-launcher-core');
 const extractZip = require('extract-zip');
 const tar = require('tar');
+const nbt = require('prismarine-nbt');
 const config = require('./config');
 const { downloadFile, fileSha1, fetchJson } = require('./download');
 
@@ -252,6 +253,49 @@ function computeAutoRam(manifest, extraSlugs) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Pre-seed del primo avvio                                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Al PRIMISSIMO avvio prepara due file in gameDir, e SOLO se non esistono
+ * già (mai sovrascrivere avvii successivi o modifiche fatte dal giocatore):
+ * - options.txt  → narratore spento + lingua italiana (senza questo file
+ *   Minecraft può partire col narrator attivo, in inglese);
+ * - servers.dat  → il server Oculandia salvato in Multiplayer, così resta
+ *   visibile quando il giocatore esce dal server e rientra da solo.
+ *   (Il Quick Play di launchGame non scrive mai su servers.dat.)
+ * Qualsiasi errore qui non deve bloccare l'avvio del gioco.
+ */
+function seedGameFiles(gameDir, manifest) {
+  fs.mkdirSync(gameDir, { recursive: true });
+
+  // options.txt (testo semplice "chiave:valore", una riga per opzione)
+  try {
+    const optionsFile = path.join(gameDir, 'options.txt');
+    if (!fs.existsSync(optionsFile)) {
+      fs.writeFileSync(optionsFile, 'narrator:0\nlang:it_it\n');
+    }
+  } catch (e) { console.warn('Pre-seed options.txt:', e.message); }
+
+  // servers.dat (NBT binario big-endian, NON compresso)
+  try {
+    const serversFile = path.join(gameDir, 'servers.dat');
+    if (!fs.existsSync(serversFile) && manifest.server && manifest.server.host) {
+      const host = manifest.server.host;
+      const port = manifest.server.port || 25565;
+      const ip = port === 25565 ? host : `${host}:${port}`;
+      const root = nbt.comp({
+        servers: nbt.list(nbt.comp([{
+          name: nbt.string(manifest.server.name || 'Oculandia VR'),
+          ip: nbt.string(ip),
+        }])),
+      }, '');
+      fs.writeFileSync(serversFile, nbt.writeUncompressed(root, 'big'));
+    }
+  } catch (e) { console.warn('Pre-seed servers.dat:', e.message); }
+}
+
+/* ------------------------------------------------------------------ */
 /* Avvio del gioco                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -260,6 +304,7 @@ function computeAutoRam(manifest, extraSlugs) {
  * Ritorna l'EventEmitter di minecraft-launcher-core.
  */
 async function launchGame({ gameDir, manifest, authorization, settings, onStatus }) {
+  seedGameFiles(gameDir, manifest); // solo al primissimo avvio (file mancanti)
   const javaExe = await ensureJava(gameDir, manifest.javaMajor || 21, onStatus);
   const versionId = await ensureFabric(gameDir, manifest.minecraft, manifest.fabricLoader, onStatus);
   await syncMods(gameDir, manifest, settings, onStatus);
@@ -299,4 +344,4 @@ async function launchGame({ gameDir, manifest, authorization, settings, onStatus
   return launcher;
 }
 
-module.exports = { getManifest, ensureJava, ensureFabric, syncMods, launchGame, javaPlatform, computeAutoRam };
+module.exports = { getManifest, ensureJava, ensureFabric, syncMods, seedGameFiles, launchGame, javaPlatform, computeAutoRam };
