@@ -1,11 +1,12 @@
 name: Build OcuLauncher Staff
 
-# Edizione STAFF (accesso locale, senza Microsoft). Parte con un tag staff-v*
-# (es. staff-v1.0.0) o a mano da Actions. Pubblica una release PRE-RELEASE
-# separata, così NON diventa la "latest" e non finisce sulla pagina pubblica.
+# Edizione STAFF (accesso locale, senza Microsoft). Parte con un tag v*-staff
+# (es. v1.0.0-staff). Pubblica una PRE-RELEASE separata: non diventa "latest"
+# e non finisce sulla pagina pubblica. La build pubblica (build.yml) ignora
+# i tag *-staff, così non parte due volte.
 on:
   push:
-    tags: ['staff-v*']
+    tags: ['v*-staff']
   workflow_dispatch:
 
 permissions:
@@ -32,13 +33,13 @@ jobs:
       - name: Installa dipendenze
         run: npm ci
 
-      - name: Attiva edizione Staff + versione dedicata
+      - name: Attiva edizione Staff + versione dal tag
         shell: bash
         run: |
           node -e "const fs=require('fs');fs.writeFileSync('src/edition.json',JSON.stringify({edition:'staff'},null,2))"
-          VER="${GITHUB_REF_NAME#staff-v}"; if [ -z "$VER" ] || [ "$VER" = "$GITHUB_REF_NAME" ]; then VER="1.0.0"; fi
-          node -e "const fs=require('fs');const p=require('./package.json');p.version='${VER}-staff';fs.writeFileSync('package.json',JSON.stringify(p,null,2))"
-          echo "Edizione: staff, versione ${VER}-staff"
+          VER="${GITHUB_REF_NAME#v}"; if [ -z "$VER" ] || [ "$VER" = "$GITHUB_REF_NAME" ]; then VER="1.0.0-staff"; fi
+          node -e "const fs=require('fs');const p=require('./package.json');p.version='${VER}';fs.writeFileSync('package.json',JSON.stringify(p,null,2))"
+          echo "Edizione staff, versione ${VER} (tag ${GITHUB_REF_NAME})"
 
       - name: Compila e pubblica (pre-release Staff)
         run: npx electron-builder --config electron-builder-staff.yml ${{ matrix.args }} --publish always

@@ -3,7 +3,9 @@ name: Build OcuLauncher
 # Parte quando pubblichi un tag tipo v1.0.0 (oppure a mano da Actions → Run workflow).
 on:
   push:
-    tags: ['v*']
+    tags:
+      - 'v*'
+      - '!v*-staff'
   workflow_dispatch:
 
 permissions:
