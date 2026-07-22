@@ -8,10 +8,10 @@ files:
   - src/**/*
   - package.json
 asar: true
+afterPack: build/afterPack.js
 
 publish:
   provider: github
-  releaseType: release
 
 win:
   icon: build/icon.png
