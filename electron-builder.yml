@@ -11,6 +11,7 @@ asar: true
 
 publish:
   provider: github
+  releaseType: release
 
 win:
   icon: build/icon.png
