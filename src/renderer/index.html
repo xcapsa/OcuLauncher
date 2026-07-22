@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>OcuLauncher</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="logo">
+        <img src="icon.png" alt="Oculandia" class="logo-icon">
+        <div class="logo-text">OCULANDIA <span>VR</span></div>
+      </div>
+
+      <div class="card" id="server-card">
+        <div class="card-title">Server</div>
+        <div id="server-status"><span class="dot dot-grey"></span> Controllo…</div>
+        <div id="server-players" class="muted"></div>
+        <div id="server-address" class="muted mono"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Collegamenti</div>
+        <a href="#" class="ext-link" data-link="website">🌍 Sito della community</a>
+        <a href="#" class="ext-link" data-link="map">🗺 Mappa online</a>
+        <a href="#" class="ext-link" data-link="rules">📜 Regole del server</a>
+        <a href="#" id="open-folder">📁 Cartella di gioco</a>
+      </div>
+
+      <div class="sidebar-footer">
+        <span id="launcher-version"></span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main id="main">
+      <header id="topbar">
+        <div id="account-box">
+          <div id="avatar">?</div>
+          <div>
+            <div id="account-name">Non connesso</div>
+            <button id="btn-auth" class="btn-small">Accedi con Microsoft</button>
+          </div>
+        </div>
+        <div id="mc-version" class="muted"></div>
+      </header>
+
+      <section class="card" id="news-card">
+        <div class="card-title">Novità</div>
+        <div id="news">…</div>
+      </section>
+
+      <div id="content">
+        <section class="row">
+          <div class="card grow" id="mods-card">
+            <div class="card-title">Mod incluse <span id="mod-count" class="muted"></span></div>
+            <ul id="mod-list"></ul>
+          </div>
+
+          <div class="card" id="settings-card">
+            <div class="card-title">Impostazioni</div>
+            <label class="setting toggle">
+              <input type="checkbox" id="ram-auto" checked>
+              <span>Memoria automatica <b id="ram-auto-label"></b></span>
+            </label>
+            <label class="setting" id="ram-manual-row">
+              <span>Memoria manuale: <b id="ram-label">4 GB</b></span>
+              <input type="range" id="ram" min="2048" max="12288" step="512" value="4096">
+            </label>
+            <label class="setting toggle">
+              <input type="checkbox" id="vr-mode">
+              <span>🥽 Modalità VR (installa Vivecraft)</span>
+            </label>
+            <label class="setting toggle">
+              <input type="checkbox" id="keep-open">
+              <span>Tieni aperto il launcher durante il gioco</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="card" id="extras-card">
+          <div class="card-title">Esperienza immersiva — mod extra a tua scelta
+            <span id="extras-size" class="muted"></span>
+          </div>
+          <div class="extras-actions">
+            <button class="btn-small" id="extras-recommended">✨ Attiva le consigliate</button>
+            <button class="btn-small" id="extras-none">Nessuna</button>
+            <span class="muted" id="extras-hint">Shader e pacchetti risorse vanno poi attivati in gioco (Opzioni Video).</span>
+          </div>
+          <div id="extras-list"></div>
+        </section>
+      </div>
+
+      <footer id="playbar">
+        <div id="status-line">Pronto.</div>
+        <div id="progress-track"><div id="progress-bar"></div></div>
+        <button id="btn-play" disabled>GIOCA</button>
+      </footer>
+    </main>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
