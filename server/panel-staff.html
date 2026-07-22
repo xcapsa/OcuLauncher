@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Staff · Accesso locale — Oculandia</title>
+<style>
+:root{--bg:#07090d;--panel:rgba(255,255,255,.04);--border:rgba(255,255,255,.10);--text:#e9eef6;--muted:#8b9aac;--green:#35f06e;--cyan:#22d3ee;--danger:#ff6b6b;--grad:linear-gradient(135deg,#35f06e,#22d3ee)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1100px 600px at 15% -10%,rgba(53,240,110,.10),transparent 60%),radial-gradient(900px 600px at 100% 0,rgba(34,211,238,.10),transparent 55%),var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.6;min-height:100vh;padding:clamp(20px,4vw,48px)}
+.wrap{max-width:860px;margin:0 auto}
+.tag{display:inline-block;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--green);border:1px solid var(--border);border-radius:999px;padding:6px 14px;background:rgba(53,240,110,.06)}
+h1{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:800;letter-spacing:-.02em;margin:16px 0 8px}
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);max-width:640px;margin-bottom:6px}
+.warn{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);border-radius:14px;padding:14px 18px;color:#ffd7d7;font-size:.93rem;margin:22px 0}
+.warn b{color:#fff}
+.detected{color:var(--muted);font-size:.9rem;margin:26px 0 10px}
+.detected b{color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:8px 0 26px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px 18px}
+.card h3{font-size:1rem;margin-bottom:2px}
+.card p{color:var(--muted);font-size:.85rem;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:.9rem;padding:11px 18px;border-radius:11px;border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,.05);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:var(--grad);color:#04140a;border:none}
+.btn.big{font-size:1rem;padding:14px 26px}
+.hero{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px;text-align:center;margin:22px 0}
+.steps{color:var(--muted);font-size:.95rem;margin:6px 0 0 18px}
+.steps li{margin:8px 0}.steps b{color:var(--text)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0d1730;border:1px solid var(--border);border-radius:6px;padding:1px 7px;color:var(--green)}
+h2{font-size:1.2rem;margin:30px 0 6px}
+.foot{color:var(--muted);font-size:.8rem;margin-top:34px;border-top:1px solid var(--border);padding-top:16px}
+</style>
+</head>
+<body><div class="wrap">
+  <span class="tag">Riservato · Staff</span>
+  <h1>Client <span>Staff</span> — accesso locale</h1>
+  <p class="sub">Versione di OcuLauncher con login a nome utente (senza account Microsoft), per lo staff. Utile per entrare come identità di moderazione o per chi non ha Minecraft Java.</p>
+
+  <div class="warn">⚠ <b>Riservato allo staff.</b> Il login locale non verifica l'identità: la protezione reale è <b>EasyAuth</b> (ogni nome ha una password in gioco) più i comandi da op. Al primo ingresso: <span class="mono">/register &lt;password&gt; &lt;password&gt;</span>, poi <span class="mono">/login &lt;password&gt;</span>. Non condividere questi installer fuori dallo staff.</div>
+
+  <div class="hero">
+    <div class="detected" id="detected">Rilevo il tuo sistema…</div>
+    <a class="btn primary big" id="dl-main" href="#tutti">⬇️ Scarica il Client Staff</a>
+  </div>
+
+  <h2 id="tutti">Tutte le versioni</h2>
+  <div class="grid">
+    <div class="card"><h3>🪟 Windows</h3><p>Intel / AMD</p><a class="btn" data-os="win-x64" href="#">.exe</a></div>
+    <div class="card"><h3>🪟 Windows ARM</h3><p>Surface / Snapdragon</p><a class="btn" data-os="win-arm64" href="#">.exe ARM64</a></div>
+    <div class="card"><h3>🍎 Mac Apple Silicon</h3><p>M1/M2/M3/M4</p><a class="btn" data-os="mac-arm64" href="#">.dmg</a></div>
+    <div class="card"><h3>🍎 Mac Intel</h3><p>Mac più vecchi</p><a class="btn" data-os="mac-x64" href="#">.dmg</a></div>
+  </div>
+
+  <h2>Come si usa</h2>
+  <ol class="steps">
+    <li>Installa e apri <b>OcuLauncher Staff</b> (su Mac: clic destro sull'app → <b>Apri</b> la prima volta).</li>
+    <li>Scrivi il <b>nome utente</b> con cui vuoi entrare e premi <b>GIOCA</b>.</li>
+    <li>In gioco, la prima volta: <span class="mono">/register &lt;password&gt; &lt;password&gt;</span> per proteggere quel nome (EasyAuth).</li>
+    <li>Le volte successive: <span class="mono">/login &lt;password&gt;</span>.</li>
+  </ol>
+
+  <div class="foot" id="ver">Client Staff · Oculandia VR</div>
+</div>
+<script>
+const REPO='xcapsa/OcuLauncher';
+const M={'win-x64':/win-x64\.exe$/i,'win-arm64':/win-arm64\.exe$/i,'mac-x64':/mac-x64\.dmg$/i,'mac-arm64':/mac-arm64\.dmg$/i};
+const L={'win-x64':'Windows','win-arm64':'Windows ARM','mac-x64':'Mac Intel','mac-arm64':'Mac Apple Silicon'};
+(async()=>{
+  // Prende sempre l'ULTIMA prerelease staff (tag che finisce con -staff): nessun tag da aggiornare a mano.
+  let assets=null,ver='',tag='';
+  try{const r=await fetch('https://api.github.com/repos/'+REPO+'/releases?per_page=30');if(r.ok){const list=await r.json();const rel=(list||[]).find(x=>x.prerelease&&/-staff$/i.test(x.tag_name||''));if(rel){assets=rel.assets||[];ver=rel.tag_name;tag=rel.tag_name;}}}catch(e){}
+  const relUrl=tag?'https://github.com/'+REPO+'/releases/tag/'+tag:'https://github.com/'+REPO+'/releases';
+  for(const k in M){const b=document.querySelector('[data-os="'+k+'"]');const a=assets&&assets.find(x=>M[k].test(x.name));if(a){b.href=a.browser_download_url;b.textContent=b.textContent+' ('+Math.round(a.size/1e6)+' MB)';}else{b.href=relUrl;}}
+  document.getElementById('ver').textContent='Client Staff '+(ver||'')+' · Oculandia VR';
+  const ua=navigator.userAgent;let os=/Mac/i.test(ua)?'mac':/Win/i.test(ua)?'win':null,arch='x64';
+  try{if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues){const h=await navigator.userAgentData.getHighEntropyValues(['architecture']);if(/arm/i.test(h.architecture||''))arch='arm64';}}catch(e){}
+  if(os==='mac'){try{const gl=document.createElement('canvas').getContext('webgl');const d=gl&&gl.getExtension('WEBGL_debug_renderer_info');const rr=d?gl.getParameter(d.UNMASKED_RENDERER_WEBGL):'';if(/Apple (M\d|GPU)/i.test(rr))arch='arm64';}catch(e){}}
+  const key=os?os+'-'+arch:null,main=document.getElementById('dl-main'),det=document.getElementById('detected');
+  if(key&&M[key]&&assets){const a=assets.find(x=>M[key].test(x.name));if(a){main.href=a.browser_download_url;main.textContent='⬇️ Scarica per '+L[key];det.innerHTML='Sistema rilevato: <b>'+L[key]+'</b>';}}
+  else{det.textContent='Scegli la versione qui sotto.';main.href='#tutti';}
+})();
+</script>
+</body></html>
