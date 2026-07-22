@@ -20,9 +20,10 @@ win:
     - target: nsis
       arch: [x64, arm64]
 nsis:
-  oneClick: true
-  perMachine: false
-  allowElevation: true
+  oneClick: false                         # installer assistito: mostra la procedura guidata
+  allowToChangeInstallationDirectory: true  # l'utente può scegliere la cartella (anche su D:)
+  perMachine: false                       # default per-utente (niente admin obbligatorio)
+  allowElevation: true                    # se sceglie una cartella di sistema, chiede i permessi
   deleteAppDataOnUninstall: false
   artifactName: OcuLauncher-Setup-${version}-win-${arch}.${ext}
   shortcutName: OcuLauncher
