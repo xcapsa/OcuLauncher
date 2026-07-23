@@ -32,9 +32,24 @@ jobs:
       - name: Installa dipendenze
         run: npm install --no-audit --no-fund
 
+      - name: Assicura release draft (evita create-race)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --draft --title "$GITHUB_REF_NAME" --notes "OcuLauncher $GITHUB_REF_NAME" || true
       - name: Compila e pubblica nella Release
         run: npx electron-builder ${{ matrix.args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Su macOS senza certificato Apple: nessuna firma/notarizzazione.
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pubblica la release come Latest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
