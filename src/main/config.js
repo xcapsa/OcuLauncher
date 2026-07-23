@@ -16,4 +16,8 @@ module.exports = {
   WEBSITE_URL: 'https://minecraft.oculandiavr.it',
   MAP_URL: 'https://map.oculandiavr.it',
   RULES_URL: 'https://minecraft.oculandiavr.it/regole',
+  // Repo GitHub delle release (aggiornamenti del launcher).
+  GITHUB_REPO: 'xcapsa/OcuLauncher',
+  // Bot Telegram per il reset della password EasyAuth ("reset NomeMinecraft").
+  TELEGRAM_BOT_URL: 'https://t.me/OcuCraftRPbot',
 };

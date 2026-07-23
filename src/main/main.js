@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const config = require('./config');
 const { Settings } = require('./settings');
@@ -29,6 +29,11 @@ let win = null;
 let settings = null;
 let account = null;
 let gameRunning = false;
+
+// Aggiornamento del launcher in attesa, mostrato come bottone nell'interfaccia.
+// kind: 'install'  → un clic riavvia e installa (Windows, edizione pubblica)
+// kind: 'download' → un clic apre il download dell'installer nuovo (Mac e Staff)
+let pendingUpdate = null;
 
 // Cartella dati separata per edizione (Staff non condivide identità/mondo con la pubblica).
 const DATA_FOLDER = IS_STAFF ? 'OcuLauncher-Staff' : 'OcuLauncher';
@@ -101,8 +106,31 @@ function registerIpc() {
       autoRamMB: computeAutoRam(manifest, settings.get().extraMods),
       version: app.getVersion(),
       edition: EDITION,
+      update: pendingUpdate,
       links: { website: config.WEBSITE_URL, map: config.MAP_URL, rules: config.RULES_URL },
     };
+  });
+
+  // Aggiornamento launcher: installa subito (Windows pubblica) o apre il download.
+  ipcMain.handle('apply-update', () => {
+    if (!pendingUpdate) return { ok: false, error: 'Nessun aggiornamento in attesa.' };
+    if (pendingUpdate.kind === 'install') {
+      try {
+        require('electron-updater').autoUpdater.quitAndInstall(true, true);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: String(e && e.message || e) };
+      }
+    }
+    if (pendingUpdate.url) shell.openExternal(pendingUpdate.url);
+    return { ok: true };
+  });
+
+  // "Password del server dimenticata?": apre la chat del bot Telegram.
+  // Il bot risponde già a "reset NomeMinecraft" scritto in chat privata.
+  ipcMain.handle('open-password-reset', () => {
+    shell.openExternal(config.TELEGRAM_BOT_URL);
+    return true;
   });
 
   // Edizione Staff: imposta/valida il nome utente locale (nessun account Microsoft).
@@ -216,28 +244,43 @@ function registerIpc() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Auto-update del launcher (GitHub Releases)                          */
+/* Aggiornamento del launcher (GitHub Releases)                        */
 /* ------------------------------------------------------------------ */
+
+function sendUpdate(update) {
+  pendingUpdate = update;
+  if (win && !win.isDestroyed()) win.webContents.send('update', update);
+}
 
 function setupAutoUpdate() {
   if (!app.isPackaged) return;
-  try {
-    const { autoUpdater } = require('electron-updater');
-    autoUpdater.autoDownload = true;
-    autoUpdater.on('update-downloaded', async (info) => {
-      if (!win || win.isDestroyed()) return;
-      const { response } = await dialog.showMessageBox(win, {
-        type: 'info',
-        buttons: ['Riavvia e aggiorna', 'Più tardi'],
-        title: 'Aggiornamento OcuLauncher',
-        message: `È pronta la versione ${info.version} di OcuLauncher. Vuoi installarla ora?`,
+
+  // Windows, edizione pubblica: aggiornamento integrato con electron-updater.
+  // Scarica in background e mostra il bottone "Riavvia e aggiorna" quando è pronto.
+  if (process.platform === 'win32' && !IS_STAFF) {
+    try {
+      const { autoUpdater } = require('electron-updater');
+      autoUpdater.autoDownload = true;
+      autoUpdater.on('update-downloaded', (info) => {
+        sendUpdate({ kind: 'install', version: info.version });
       });
-      if (response === 0) autoUpdater.quitAndInstall();
-    });
-    autoUpdater.checkForUpdates().catch((e) => console.warn('Auto-update:', e.message));
-  } catch (e) {
-    console.warn('Auto-update non disponibile:', e.message);
+      autoUpdater.on('error', (e) => console.warn('Auto-update:', e && e.message));
+      autoUpdater.checkForUpdates().catch((e) => console.warn('Auto-update:', e.message));
+      return;
+    } catch (e) {
+      console.warn('Auto-update non disponibile:', e.message);
+    }
   }
+
+  // Mac (app senza firma Apple: l'auto-install non è permesso) ed edizione
+  // Staff (le release staff sono pre-release separate): si controlla a mano
+  // e il bottone apre il download dell'installer giusto per questa macchina.
+  const { findUpdate } = require('./updater');
+  findUpdate({ repo: config.GITHUB_REPO, staff: IS_STAFF, currentVersion: app.getVersion() })
+    .then((u) => {
+      if (u) sendUpdate({ kind: 'download', version: u.version, url: u.url });
+    })
+    .catch((e) => console.warn('Controllo aggiornamenti:', e.message));
 }
 
 /* ------------------------------------------------------------------ */
