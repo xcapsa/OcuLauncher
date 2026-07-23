@@ -199,11 +199,23 @@ async function syncMods(gameDir, manifest, settings, onStatus) {
   // mods/: rimuovi ogni jar non voluto. Altre cartelle: solo i file gestiti.
   const modsDir = path.join(gameDir, 'mods');
   fs.mkdirSync(modsDir, { recursive: true });
+  // Mod aggiunte dal giocatore: jar in mods-custom/ (incluse ma NON gestite/verificate).
+  const customDir = path.join(gameDir, 'mods-custom');
+  fs.mkdirSync(customDir, { recursive: true });
+  const customJars = settings.customMods === false ? []
+    : fs.readdirSync(customDir).filter((f) => f.endsWith('.jar'));
+  const customSet = new Set(customJars);
   for (const f of fs.readdirSync(modsDir)) {
-    if (f.endsWith('.jar') && !(wantedFiles.has(f) && wantedFiles.get(f).dir === 'mods')) {
+    if (f.endsWith('.jar') && !(wantedFiles.has(f) && wantedFiles.get(f).dir === 'mods') && !customSet.has(f)) {
       onStatus('Rimuovo mod non più prevista: ' + f);
       fs.rmSync(path.join(modsDir, f), { force: true });
     }
+  }
+  // Copia le mod del giocatore in mods/ (le mod gestite hanno la precedenza sul nome file).
+  for (const jar of customJars) {
+    if (wantedFiles.has(jar)) continue;
+    try { fs.copyFileSync(path.join(customDir, jar), path.join(modsDir, jar)); }
+    catch (e) { console.warn('Copia mod utente', jar, e.message); }
   }
   for (const { filename, dir } of managedUnwanted) {
     if (dir === 'mods') continue; // già gestito sopra
