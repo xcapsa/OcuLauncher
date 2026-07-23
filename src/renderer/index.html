@@ -5,6 +5,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
   <title>OcuLauncher</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Banner aggiornamento launcher + link "password dimenticata" */
+    #update-banner{display:flex;align-items:center;gap:12px;margin:0 0 10px;padding:10px 14px;
+      border:1px solid rgba(53,240,110,.35);border-radius:10px;background:rgba(53,240,110,.08)}
+    #update-banner.hidden{display:none}
+    #update-text{flex:1;font-size:.92rem}
+    .forgot-pass{display:inline-block;margin-top:4px;font-size:.78rem;color:#8b9aac;text-decoration:underline dotted;cursor:pointer}
+    .forgot-pass:hover{color:#e9eef6}
+  </style>
 </head>
 <body>
   <div id="app">
@@ -43,12 +52,14 @@
           <div>
             <div id="account-name">Non connesso</div>
             <button id="btn-auth" class="btn-small">Accedi con Microsoft</button>
+            <a href="#" class="forgot-pass" title="Apre @OcuCraftRPbot su Telegram: scrivi &quot;reset&quot; + il tuo nome Minecraft">Password del server dimenticata?</a>
           </div>
         </div>
         <div id="local-box" style="display:none">
           <span class="local-badge">STAFF · accesso locale</span>
           <input type="text" id="local-username" maxlength="16" placeholder="Nome utente in gioco" autocomplete="off" spellcheck="false">
           <span id="local-hint" class="muted"></span>
+          <a href="#" class="forgot-pass" title="Apre @OcuCraftRPbot su Telegram: scrivi &quot;reset&quot; + il tuo nome Minecraft">Password del server dimenticata?</a>
         </div>
         <div id="mc-version" class="muted"></div>
       </header>
@@ -97,6 +108,11 @@
           </div>
           <div id="extras-list"></div>
         </section>
+      </div>
+
+      <div id="update-banner" class="hidden">
+        <span id="update-text">🔄 Nuova versione disponibile</span>
+        <button id="btn-update" class="btn-small">Aggiorna</button>
       </div>
 
       <footer id="playbar">

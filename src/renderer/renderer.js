@@ -145,6 +145,8 @@ async function init() {
   renderExtras();
   updateAutoRamLabel();
 
+  if (state.update) showUpdate(state.update);
+
   if (state.edition === 'staff') {
     initStaff(s);
   } else {
@@ -200,6 +202,35 @@ function initStaff(s) {
   if (refresh()) setStatus('Bentornato, ' + input.value.trim() + '! Premi GIOCA.');
   else setStatus('Inserisci il nome utente con cui vuoi entrare.');
 }
+
+/* ---- Aggiornamento del launcher ---- */
+
+function showUpdate(u) {
+  const name = state && state.edition === 'staff' ? 'OcuLauncher Staff' : 'OcuLauncher';
+  $('update-text').textContent = `🔄 È disponibile ${name} ${u.version}`;
+  $('btn-update').textContent = u.kind === 'install' ? 'Riavvia e aggiorna' : 'Scarica aggiornamento';
+  $('update-banner').classList.remove('hidden');
+  $('btn-update').onclick = async () => {
+    if (u.kind === 'install') {
+      setStatus('Riavvio il launcher per installare la versione ' + u.version + '…');
+    } else {
+      setStatus('Scarico la versione ' + u.version + ': quando finisce, installala e riapri il launcher.');
+    }
+    await ocu.applyUpdate();
+  };
+}
+
+ocu.onUpdate(showUpdate);
+
+/* ---- Password del server dimenticata (bot Telegram) ---- */
+
+document.querySelectorAll('.forgot-pass').forEach((a) => {
+  a.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ocu.openPasswordReset();
+    setStatus('Si apre Telegram: nella chat del bot scrivi "reset" seguito dal tuo nome Minecraft (es. reset Steve).');
+  });
+});
 
 /* ---- Eventi UI ---- */
 
