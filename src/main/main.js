@@ -1,6 +1,7 @@
 'use strict';
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const config = require('./config');
 const { Settings } = require('./settings');
 const { Account } = require('./auth');
@@ -177,6 +178,11 @@ function registerIpc() {
   });
 
   ipcMain.handle('open-game-folder', () => shell.openPath(gameDir()));
+  ipcMain.handle('open-custom-mods-folder', () => {
+    const dir = path.join(gameDir(), 'mods-custom');
+    try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+    return shell.openPath(dir);
+  });
   ipcMain.handle('open-external', (_ev, url) => {
     if (/^https:\/\//.test(url)) shell.openExternal(url);
   });
