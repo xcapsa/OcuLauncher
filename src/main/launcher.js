@@ -278,6 +278,29 @@ function computeAutoRam(manifest, extraSlugs) {
  *   (Il Quick Play di launchGame non scrive mai su servers.dat.)
  * Qualsiasi errore qui non deve bloccare l'avvio del gioco.
  */
+function ensureOculandiaServer(gameDir, manifest) {
+  // Assicura che il server Oculandia sia sempre nella lista multiplayer (servers.dat),
+  // aggiungendolo se manca senza toccare gli altri server aggiunti dal giocatore.
+  try {
+    if (!manifest || !manifest.server || !manifest.server.host) return;
+    const serversFile = path.join(gameDir, 'servers.dat');
+    const host = String(manifest.server.host);
+    const srvName = String((manifest.server && manifest.server.name) || 'Oculandia VR');
+    let items = [];
+    if (fs.existsSync(serversFile)) {
+      try {
+        const parsed = nbt.parseUncompressed(fs.readFileSync(serversFile), 'big');
+        const arr = parsed && parsed.value && parsed.value.servers && parsed.value.servers.value && parsed.value.servers.value.value;
+        if (Array.isArray(arr)) items = arr;
+      } catch (e) { items = []; }
+    }
+    if (items.some((it) => it && it.ip && String(it.ip.value) === host)) return;
+    items.unshift({ name: { type: 'string', value: srvName }, ip: { type: 'string', value: host } });
+    const root = { type: 'compound', name: '', value: { servers: { type: 'list', value: { type: 'compound', value: items } } } };
+    fs.writeFileSync(serversFile, nbt.writeUncompressed(root, 'big'));
+  } catch (e) { console.warn('ensureOculandiaServer:', e && e.message); }
+}
+
 function seedGameFiles(gameDir, manifest) {
   fs.mkdirSync(gameDir, { recursive: true });
 
@@ -317,6 +340,7 @@ function seedGameFiles(gameDir, manifest) {
  */
 async function launchGame({ gameDir, manifest, authorization, settings, onStatus }) {
   seedGameFiles(gameDir, manifest); // solo al primissimo avvio (file mancanti)
+  ensureOculandiaServer(gameDir, manifest); // ogni avvio: ripristina Oculandia se sparito
   const javaExe = await ensureJava(gameDir, manifest.javaMajor || 21, onStatus);
   const versionId = await ensureFabric(gameDir, manifest.minecraft, manifest.fabricLoader, onStatus);
   await syncMods(gameDir, manifest, settings, onStatus);
