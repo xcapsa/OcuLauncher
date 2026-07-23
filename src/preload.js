@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld('ocu', {
   play: () => ipcRenderer.invoke('play'),
   openGameFolder: () => ipcRenderer.invoke('open-game-folder'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  applyUpdate: () => ipcRenderer.invoke('apply-update'),
+  openPasswordReset: () => ipcRenderer.invoke('open-password-reset'),
   onStatus: (cb) => ipcRenderer.on('status', (_ev, data) => cb(data)),
   onGameState: (cb) => ipcRenderer.on('game-state', (_ev, state) => cb(state)),
+  onUpdate: (cb) => ipcRenderer.on('update', (_ev, data) => cb(data)),
 });
