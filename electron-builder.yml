@@ -12,7 +12,7 @@ afterPack: build/afterPack.js
 
 publish:
   provider: github
-  releaseType: release
+  releaseType: prerelease
 
 win:
   icon: build/icon.png
