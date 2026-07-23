@@ -41,23 +41,9 @@ jobs:
           node -e "const fs=require('fs');const p=require('./package.json');p.version='${VER}';fs.writeFileSync('package.json',JSON.stringify(p,null,2))"
           echo "Edizione staff, versione ${VER} (tag ${GITHUB_REF_NAME})"
 
-      - name: Assicura release draft (evita create-race)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --draft --prerelease --title "$GITHUB_REF_NAME" --notes "OcuLauncher $GITHUB_REF_NAME" 2>/dev/null || gh release edit "$GITHUB_REF_NAME" --draft 2>/dev/null || true
       - name: Compila e pubblica (pre-release Staff)
         run: npx electron-builder --config electron-builder-staff.yml ${{ matrix.args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pubblica la pre-release Staff
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release edit "$GITHUB_REF_NAME" --draft=false --prerelease
