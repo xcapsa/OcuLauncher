@@ -467,6 +467,68 @@
           "size": 850941
         }
       ]
+    },
+    {
+      "slug": "jade",
+      "name": "Jade",
+      "desc": "Mostra cosa stai guardando (blocco/creatura) con una scheda in alto",
+      "category": "utilita",
+      "heavy": false,
+      "type": "mod",
+      "version": "18.2.0+fabric",
+      "files": [
+        { "filename": "Jade-1.21.5-Fabric-18.2.0.jar", "url": "https://cdn.modrinth.com/data/nvQzSEkH/versions/VNSIKHbV/Jade-1.21.5-Fabric-18.2.0.jar", "sha1": "4cb31277f7ff38f3f77346b68fdf85f3c4051c14", "size": 810389, "of": "Jade" }
+      ]
+    },
+    {
+      "slug": "appleskin",
+      "name": "AppleSkin",
+      "desc": "Mostra saturazione e valori di cibo nella barra della fame",
+      "category": "utilita",
+      "heavy": false,
+      "type": "mod",
+      "version": "3.0.6+mc1.21.5",
+      "files": [
+        { "filename": "appleskin-fabric-mc1.21.5-3.0.6.jar", "url": "https://cdn.modrinth.com/data/EsAfCjCV/versions/VfjnbBAT/appleskin-fabric-mc1.21.5-3.0.6.jar", "sha1": "f0f13f77193acbdf6fda4f8be8f09646117aebae", "size": 1096137, "of": "AppleSkin" }
+      ]
+    },
+    {
+      "slug": "zoomify",
+      "name": "Zoomify",
+      "desc": "Tasto per zoomare (come un binocolo), configurabile",
+      "category": "utilita",
+      "heavy": false,
+      "type": "mod",
+      "version": "2.15.2+1.21.5",
+      "files": [
+        { "filename": "zoomify-2.15.2+1.21.5.jar", "url": "https://cdn.modrinth.com/data/w7ThoJFB/versions/r2ewk22o/zoomify-2.15.2%2B1.21.5.jar", "sha1": "165adbb9c5c26761ace81ccd2cf561d1ca18cd72", "size": 872894, "of": "Zoomify" },
+        { "filename": "yet_another_config_lib_v3-3.8.2+1.21.5-fabric.jar", "url": "https://cdn.modrinth.com/data/1eAoo2KR/versions/oReM1Qvh/yet_another_config_lib_v3-3.8.2%2B1.21.5-fabric.jar", "sha1": "6a1ef85842064a98eff99f2fd72754be3a469eeb", "size": 1130747, "of": "YetAnotherConfigLib (libreria)" },
+        { "filename": "fabric-language-kotlin-1.13.13+kotlin.2.4.10.jar", "url": "https://cdn.modrinth.com/data/Ha28R6CL/versions/bdhiINYC/fabric-language-kotlin-1.13.13%2Bkotlin.2.4.10.jar", "sha1": "620cb137a9dc69ce86f3114f19d9eedab16366f5", "size": 8076363, "of": "Fabric Language Kotlin (libreria)" }
+      ]
+    },
+    {
+      "slug": "dynamic-fps",
+      "name": "Dynamic FPS",
+      "desc": "Riduce l'uso di CPU/GPU quando il gioco è in secondo piano",
+      "category": "utilita",
+      "heavy": false,
+      "type": "mod",
+      "version": "3.11.4",
+      "files": [
+        { "filename": "dynamic-fps-3.11.4+minecraft-1.21.5-fabric.jar", "url": "https://cdn.modrinth.com/data/LQ3K71Q1/versions/9io2uHZG/dynamic-fps-3.11.4%2Bminecraft-1.21.5-fabric.jar", "sha1": "56255b3327d319f502f4deed9c6df98e53c211ba", "size": 218573, "of": "Dynamic FPS" }
+      ]
+    },
+    {
+      "slug": "badoptimizations",
+      "name": "BadOptimizations",
+      "desc": "Ottimizzazioni varie per più FPS (invisibile, solo prestazioni)",
+      "category": "utilita",
+      "heavy": false,
+      "type": "mod",
+      "version": "2.4.1",
+      "files": [
+        { "filename": "BadOptimizations-2.4.1-1.21.2-21.5.jar", "url": "https://cdn.modrinth.com/data/g96Z4WVZ/versions/KsC2V6FQ/BadOptimizations-2.4.1-1.21.2-21.5.jar", "sha1": "f3ac49d4866a6fde8623c0021481285dc1d3d2b8", "size": 282678, "of": "BadOptimizations" }
+      ]
     }
   ],
   "_commentOptional": "optionalMods: mod facoltative scelte dal giocatore nel launcher (esperienza immersiva). type: mod|shaderpack|resourcepack. heavy: consigliata solo per PC potenti. requires: slug auto-inclusi."
