@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('ocu', {
   pingServer: () => ipcRenderer.invoke('ping-server'),
   play: () => ipcRenderer.invoke('play'),
   openGameFolder: () => ipcRenderer.invoke('open-game-folder'),
+  openCustomModsFolder: () => ipcRenderer.invoke('open-custom-mods-folder'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   applyUpdate: () => ipcRenderer.invoke('apply-update'),
   openPasswordReset: () => ipcRenderer.invoke('open-password-reset'),
