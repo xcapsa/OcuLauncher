@@ -80,6 +80,13 @@ function renderExtras() {
       desc.className = 'extra-desc';
       desc.textContent = m.desc + (m.sizeMB ? ` · ${m.sizeMB} MB` : '');
       txt.append(name, desc);
+      const blockers = [...conflictsOf(m.slug)].filter((s) => selected.has(s));
+      if (blockers.length) {
+        const warn = document.createElement('div');
+        warn.textContent = `⚠ Non insieme a ${blockers.map(nameOf).join(', ')}`;
+        warn.style.cssText = 'color:#e0a030;font-size:11px;margin-top:2px;';
+        txt.append(warn);
+      }
       label.append(cb, txt);
       list.appendChild(label);
     }
@@ -94,13 +101,84 @@ async function saveExtras(slugs) {
   updateAutoRamLabel();
 }
 
+/* ---- Compatibilità mod: dipendenze (requires) + conflitti (conflicts) ---- */
+
+function optionalMods() {
+  return state.manifest.optionalMods || [];
+}
+function modBySlug(slug) {
+  return optionalMods().find((m) => m.slug === slug) || null;
+}
+function nameOf(slug) {
+  const m = modBySlug(slug);
+  return m ? m.name : slug;
+}
+// Conflitti simmetrici: se A dichiara B incompatibile, vale anche B→A.
+function conflictsOf(slug) {
+  const out = new Set();
+  const self = modBySlug(slug);
+  for (const c of (self && self.conflicts) || []) out.add(c);
+  for (const m of optionalMods()) if ((m.conflicts || []).includes(slug)) out.add(m.slug);
+  return out;
+}
+
+/**
+ * Normalizza una selezione di mod extra:
+ *   1. risolve i conflitti (le mod in `keep` hanno la precedenza e restano accese);
+ *   2. rimuove in cascata le dipendenze non più soddisfatte (es. Fresh Animations
+ *      senza EMF/ETF).
+ * Muta `sel` e ritorna { sel, removed } dove `removed` sono gli slug tolti in automatico.
+ */
+function resolveExtras(sel, keep) {
+  const removed = new Set();
+  const priority = new Set(keep || []);
+  // 1) Conflitti: spegni ciò che è incompatibile con una mod prioritaria.
+  for (const p of priority) {
+    for (const c of conflictsOf(p)) {
+      if (sel.has(c) && !priority.has(c)) { sel.delete(c); removed.add(c); }
+    }
+  }
+  // 1b) Conflitti residui fra mod non prioritarie (set consigliati/importati).
+  for (const a of [...sel]) {
+    if (!sel.has(a)) continue;
+    for (const c of conflictsOf(a)) {
+      if (sel.has(c) && !priority.has(c)) { sel.delete(c); removed.add(c); }
+    }
+  }
+  // 2) Dipendenze: togli chi richiede una mod non più presente (a cascata).
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const slug of [...sel]) {
+      const m = modBySlug(slug);
+      for (const req of (m && m.requires) || []) {
+        if (!sel.has(req)) { sel.delete(slug); removed.add(slug); changed = true; break; }
+      }
+    }
+  }
+  return { sel, removed };
+}
+
 function toggleExtra(mod, on) {
   const sel = new Set(state.settings.extraMods || []);
   if (on) {
     sel.add(mod.slug);
     for (const req of mod.requires || []) sel.add(req); // dipendenze (es. Fresh Animations → EMF+ETF)
+    const keep = new Set([mod.slug, ...(mod.requires || [])]);
+    const { removed } = resolveExtras(sel, keep);
+    if (removed.size) {
+      const list = [...removed].map(nameOf).join(', ');
+      setStatus(`Ho disattivato ${list}: non è compatibile con ${mod.name} (insieme causano un crash). Puoi tenere solo uno dei due.`);
+    } else {
+      setStatus(`${mod.name} attivata: verrà installata al prossimo GIOCA.`);
+    }
   } else {
     sel.delete(mod.slug);
+    const { removed } = resolveExtras(sel, new Set(sel)); // solo cascata dipendenze
+    if (removed.size) {
+      const list = [...removed].map(nameOf).join(', ');
+      setStatus(`Disattivata ${mod.name}. Ho tolto anche ${list} perché la richiedeva.`);
+    }
   }
   saveExtras([...sel]);
 }
@@ -282,8 +360,9 @@ $('ram-auto').addEventListener('change', async () => {
 });
 
 $('extras-recommended').addEventListener('click', () => {
-  const slugs = (state.manifest.optionalMods || []).filter((m) => !m.heavy).map((m) => m.slug);
-  saveExtras(slugs);
+  const sel = new Set((state.manifest.optionalMods || []).filter((m) => !m.heavy).map((m) => m.slug));
+  const { sel: resolved } = resolveExtras(sel, new Set());
+  saveExtras([...resolved]);
   setStatus('Attivate le mod immersive consigliate: verranno installate al prossimo GIOCA.');
 });
 $('extras-none').addEventListener('click', () => {
