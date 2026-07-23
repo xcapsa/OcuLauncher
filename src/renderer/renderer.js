@@ -45,7 +45,7 @@ function renderMods(manifest, vrMode) {
   $('mod-count').textContent = `(${count} attive)`;
 }
 
-const CATEGORY_LABELS = { grafica: '🎨 Grafica e shader', animazioni: '🏃 Animazioni e modelli', audio: '🔊 Audio realistico', mondo: '🌍 Mondo (per PC potenti)' };
+const CATEGORY_LABELS = { grafica: '🎨 Grafica e shader', animazioni: '🏃 Animazioni e modelli', audio: '🔊 Audio realistico', mondo: '🌍 Mondo (per PC potenti)', utilita: '🛠 Utilità e prestazioni' };
 
 function renderExtras() {
   const list = $('extras-list');
@@ -56,7 +56,9 @@ function renderExtras() {
   const byCat = {};
   for (const m of mods) (byCat[m.category] = byCat[m.category] || []).push(m);
 
-  for (const cat of ['grafica', 'animazioni', 'audio', 'mondo']) {
+  const CAT_ORDER = ['grafica', 'animazioni', 'audio', 'mondo', 'utilita'];
+  const cats = [...CAT_ORDER.filter((c) => byCat[c]), ...Object.keys(byCat).filter((c) => !CAT_ORDER.includes(c))];
+  for (const cat of cats) {
     if (!byCat[cat]) continue;
     const title = document.createElement('div');
     title.className = 'extras-group-title';
@@ -220,6 +222,7 @@ async function init() {
   $('ram-manual-row').classList.toggle('hidden', s.ramAuto !== false);
   $('vr-mode').checked = !!s.vrMode;
   $('keep-open').checked = !!s.keepOpen;
+  $('custom-mods').checked = s.customMods !== false;
   renderExtras();
   updateAutoRamLabel();
 
@@ -379,6 +382,12 @@ $('vr-mode').addEventListener('change', async () => {
 });
 
 $('keep-open').addEventListener('change', () => ocu.setSettings({ keepOpen: $('keep-open').checked }));
+$('custom-mods').addEventListener('change', () => ocu.setSettings({ customMods: $('custom-mods').checked }));
+$('custom-open').addEventListener('click', (ev) => {
+  ev.preventDefault();
+  ocu.openCustomModsFolder();
+  setStatus('Ho aperto la cartella "Le tue mod": trascina qui i tuoi .jar (solo lato client), poi premi GIOCA.');
+});
 
 document.querySelectorAll('.ext-link').forEach((a) => {
   a.addEventListener('click', (ev) => {
