@@ -31,7 +31,7 @@ jobs:
           cache: npm
 
       - name: Installa dipendenze
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Attiva edizione Staff + versione dal tag
         shell: bash
