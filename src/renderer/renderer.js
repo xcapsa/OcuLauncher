@@ -289,11 +289,17 @@ function initStaff(s) {
 function showUpdate(u) {
   const name = state && state.edition === 'staff' ? 'OcuLauncher Staff' : 'OcuLauncher';
   $('update-text').textContent = `🔄 È disponibile ${name} ${u.version}`;
-  $('btn-update').textContent = u.kind === 'install' ? 'Riavvia e aggiorna' : 'Scarica aggiornamento';
+  $('btn-update').textContent =
+    u.kind === 'install' ? 'Riavvia e aggiorna'
+    : u.kind === 'swap' ? 'Aggiorna e riavvia'
+    : 'Scarica aggiornamento';
   $('update-banner').classList.remove('hidden');
   $('btn-update').onclick = async () => {
     if (u.kind === 'install') {
       setStatus('Riavvio il launcher per installare la versione ' + u.version + '…');
+    } else if (u.kind === 'swap') {
+      $('btn-update').disabled = true;
+      setStatus('Aggiorno alla versione ' + u.version + '… il launcher si riavvia da solo.');
     } else {
       setStatus('Scarico la versione ' + u.version + ': quando finisce, installala e riapri il launcher.');
     }
