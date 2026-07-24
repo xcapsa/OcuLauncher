@@ -115,6 +115,10 @@ function registerIpc() {
   // Aggiornamento launcher: installa subito (Windows pubblica) o apre il download.
   ipcMain.handle('apply-update', () => {
     if (!pendingUpdate) return { ok: false, error: 'Nessun aggiornamento in attesa.' };
+    if (pendingUpdate.kind === 'swap') {
+      installMacUpdate(pendingUpdate);
+      return { ok: true };
+    }
     if (pendingUpdate.kind === 'install') {
       try {
         require('electron-updater').autoUpdater.quitAndInstall(true, true);
@@ -250,6 +254,61 @@ function registerIpc() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Aggiornamento in-place su Mac: scarica lo zip della nuova versione,  */
+/* sostituisce la .app e riavvia. Niente DMG, niente nuovo "Apri?":     */
+/* il download interno non ha la quarantena di Gatekeeper.              */
+/* ------------------------------------------------------------------ */
+
+let updating = false;
+async function installMacUpdate(u) {
+  if (updating) return; updating = true;
+  const { spawn } = require('child_process');
+  const run = (cmd, args) => new Promise((resolve, reject) => {
+    const pr = spawn(cmd, args);
+    pr.on('error', reject);
+    pr.on('close', (code) => (code === 0 ? resolve() : reject(new Error(cmd + ' exit ' + code))));
+  });
+  try {
+    const { downloadFile } = require('./download');
+    const tmpRoot = fs.mkdtempSync(path.join(app.getPath('temp'), 'ocu-update-'));
+    const zipPath = path.join(tmpRoot, 'update.zip');
+    sendStatus('Scarico OcuLauncher ' + u.version + '\u2026', 0);
+    await downloadFile(u.url, zipPath, {
+      timeout: 600000,
+      onProgress: (d, t) => sendStatus(
+        'Scarico OcuLauncher ' + u.version + '\u2026 ' + Math.round(d / 1048576) + '/' + Math.round(t / 1048576) + ' MB', d / t),
+    });
+    sendStatus("Installo l'aggiornamento\u2026");
+    const extractDir = path.join(tmpRoot, 'new');
+    fs.mkdirSync(extractDir, { recursive: true });
+    await run('ditto', ['-xk', zipPath, extractDir]);       // preserva firme e symlink
+    const newApp = fs.readdirSync(extractDir).find((f) => f.endsWith('.app'));
+    if (!newApp) throw new Error('archivio inatteso (manca la .app)');
+    const src = path.join(extractDir, newApp);
+    await run('xattr', ['-dr', 'com.apple.quarantine', src]).catch(() => {});
+    const bundle = path.resolve(path.dirname(app.getPath('exe')), '..', '..');
+    if (!bundle.endsWith('.app')) throw new Error('percorso app non riconosciuto: ' + bundle);
+    const old = bundle + '.old';
+    fs.rmSync(old, { recursive: true, force: true });
+    fs.renameSync(bundle, old);                              // spostare l'app in esecuzione è permesso
+    try {
+      fs.renameSync(src, bundle);
+    } catch (_) {
+      await run('ditto', [src, bundle]);                     // fallback se tmp è su un altro volume
+    }
+    spawn('rm', ['-rf', old], { detached: true, stdio: 'ignore' }).unref();
+    sendStatus('Aggiornato alla ' + u.version + '! Riavvio\u2026');
+    spawn('open', [bundle], { detached: true, stdio: 'ignore' }).unref();
+    setTimeout(() => app.quit(), 600);
+  } catch (e) {
+    updating = false;
+    sendStatus('Aggiornamento non riuscito: ' + String(e && e.message || e) +
+      (pendingUpdate && pendingUpdate.fallbackUrl ? ' \u2014 uso il download classico.' : ''));
+    if (pendingUpdate && pendingUpdate.fallbackUrl) shell.openExternal(pendingUpdate.fallbackUrl);
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Aggiornamento del launcher (GitHub Releases)                        */
 /* ------------------------------------------------------------------ */
 
@@ -284,7 +343,12 @@ function setupAutoUpdate() {
   const { findUpdate } = require('./updater');
   findUpdate({ repo: config.GITHUB_REPO, staff: IS_STAFF, currentVersion: app.getVersion() })
     .then((u) => {
-      if (u) sendUpdate({ kind: 'download', version: u.version, url: u.url });
+      if (!u) return;
+      if (process.platform === 'darwin' && u.zipUrl) {
+        sendUpdate({ kind: 'swap', version: u.version, url: u.zipUrl, fallbackUrl: u.url });
+      } else {
+        sendUpdate({ kind: 'download', version: u.version, url: u.url });
+      }
     })
     .catch((e) => console.warn('Controllo aggiornamenti:', e.message));
 }
