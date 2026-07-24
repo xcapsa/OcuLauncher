@@ -47,10 +47,19 @@ async function findUpdate({ repo, staff, currentVersion, platform = process.plat
   if (compareVersions(rel.tag_name, currentVersion) <= 0) return null;
   const suffix = assetSuffix(platform, arch);
   const asset = (rel.assets || []).find((x) => x.name && x.name.toLowerCase().endsWith(suffix));
+  // Su Mac cerchiamo anche lo .zip: permette l'aggiornamento in-place
+  // (il launcher si sostituisce da solo, senza reinstallare dal DMG).
+  let zipUrl = null;
+  if (platform === 'darwin') {
+    const zsuf = 'mac-' + (arch === 'arm64' ? 'arm64' : 'x64') + '.zip';
+    const z = (rel.assets || []).find((x) => x.name && x.name.toLowerCase().endsWith(zsuf));
+    if (z) zipUrl = z.browser_download_url;
+  }
   return {
     version: baseVersion(rel.tag_name),
     tag: rel.tag_name,
     url: asset ? asset.browser_download_url : rel.html_url,
+    zipUrl,
   };
 }
 
