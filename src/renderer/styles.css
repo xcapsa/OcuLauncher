@@ -196,6 +196,8 @@ body {
   cursor: pointer;
 }
 .extra-item:hover { border-color: #2b4a7a; }
+.extra-item.disabled { opacity: 0.55; cursor: not-allowed; background: #111827; }
+.extra-item.disabled:hover { border-color: var(--card-border); }
 .extra-item input { accent-color: #16c784; width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; }
 .extra-item.checked { border-color: #16c784; background: #10241f; }
 .extra-name { font-size: 13.5px; font-weight: 600; }

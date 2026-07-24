@@ -147,7 +147,17 @@ function modApplies(mod, vrMode) {
   return true;
 }
 
-/** Espande la selezione di mod opzionali con i loro `requires`. */
+function getConflicts(manifest, slug) {
+  const optionalMods = manifest.optionalMods || [];
+  const entry = optionalMods.find((m) => m.slug === slug);
+  const out = new Set((entry && entry.conflicts) || []);
+  for (const mod of optionalMods) {
+    if ((mod.conflicts || []).includes(slug)) out.add(mod.slug);
+  }
+  return out;
+}
+
+/** Espande la selezione di mod opzionali con i loro `requires` e scarta conflitti. */
 function expandExtraSelection(manifest, extraSlugs) {
   const bySlug = new Map((manifest.optionalMods || []).map((m) => [m.slug, m]));
   const selected = new Set();
@@ -156,6 +166,8 @@ function expandExtraSelection(manifest, extraSlugs) {
     const slug = queue.shift();
     const entry = bySlug.get(slug);
     if (!entry || selected.has(slug)) continue;
+    const conflicts = getConflicts(manifest, slug);
+    if ([...conflicts].some((conflict) => selected.has(conflict))) continue;
     selected.add(slug);
     for (const req of entry.requires || []) queue.push(req);
   }
