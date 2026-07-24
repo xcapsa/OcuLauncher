@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('ocu', {
   play: () => ipcRenderer.invoke('play'),
   openGameFolder: () => ipcRenderer.invoke('open-game-folder'),
   openCustomModsFolder: () => ipcRenderer.invoke('open-custom-mods-folder'),
+  getSkin: () => ipcRenderer.invoke('get-skin'),
+  chooseStaffSkin: () => ipcRenderer.invoke('choose-staff-skin'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   applyUpdate: () => ipcRenderer.invoke('apply-update'),
   openPasswordReset: () => ipcRenderer.invoke('open-password-reset'),
