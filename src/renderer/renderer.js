@@ -223,6 +223,17 @@ async function init() {
   $('vr-mode').checked = !!s.vrMode;
   $('keep-open').checked = !!s.keepOpen;
   $('custom-mods').checked = s.customMods !== false;
+  // Ripulisce le scelte salvate non più valide: chi arriva da una versione
+  // vecchia (che ignorava i conflitti) può avere due mod incompatibili attive.
+  try {
+    const saved = new Set(state.settings.extraMods || []);
+    const { removed: cleaned } = resolveExtras(saved, new Set());
+    if (cleaned.size) {
+      await saveExtras([...saved]);
+      setStatus('Ho disattivato ' + [...cleaned].map(nameOf).join(', ') + ': non compatibile con le altre mod scelte (insieme causano crash).');
+    }
+  } catch (e) { console.warn('Pulizia mod incompatibili:', e && e.message); }
+
   renderExtras();
   updateAutoRamLabel();
 
