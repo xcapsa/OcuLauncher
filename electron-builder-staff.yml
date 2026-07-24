@@ -31,7 +31,8 @@ nsis:
 mac:
   icon: build/icon.png
   category: public.app-category.games
-  identity: null   # niente firma Apple: gli utenti aprono con clic destro → Apri
+  # La firma Apple resta opzionale: senza secrets in GitHub Actions la build è unsigned
+  # e build/afterPack.js applica una firma ad-hoc locale per evitare il blocco "app danneggiata".
   target:
     - target: dmg
       arch: [x64, arm64]
