@@ -1,0 +1,136 @@
+/* OcuLauncher FX — intro assemblata, ambiente vivo, micro-animazioni.
+   Tutto degrada con grazia: con prefers-reduced-motion le animazioni spariscono. */
+
+/* ---- Livelli: particelle dietro, app davanti, intro sopra tutto ---- */
+#fx-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+#app { position: relative; z-index: 1; }
+
+/* ---- Intro: i pezzi entrano e assemblano il logo ---- */
+#fx-intro {
+  position: fixed; inset: 0; z-index: 999;
+  background: radial-gradient(900px 500px at 50% 30%, #10315033 0%, transparent 60%), var(--bg, #0b1220);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 26px; cursor: pointer;
+}
+#fx-intro.fx-out { animation: fxFade .45s ease forwards; }
+@keyframes fxFade { to { opacity: 0; visibility: hidden; } }
+
+#fx-grid { position: relative; width: 152px; height: 152px; }
+.fx-voxel {
+  position: absolute; width: 34px; height: 34px; border-radius: 7px;
+  left: calc(var(--gx) * 39px); top: calc(var(--gy) * 39px);
+  background: linear-gradient(135deg, #16c784, #0ea5e9);
+  box-shadow: 0 0 14px #16c78455, inset 0 0 6px #ffffff22;
+  opacity: 0;
+  transform: translate(var(--sx), var(--sy)) rotate(var(--sr)) scale(.4);
+}
+#fx-intro.fx-go .fx-voxel {
+  animation: fxAssemble .72s cubic-bezier(.2, 1.4, .3, 1) forwards;
+  animation-delay: var(--d);
+}
+@keyframes fxAssemble {
+  0%   { opacity: 0; transform: translate(var(--sx), var(--sy)) rotate(var(--sr)) scale(.4); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+#fx-title { display: flex; gap: 3px; font-size: 30px; font-weight: 800; letter-spacing: 4px; }
+#fx-title .fx-ch {
+  opacity: 0; transform: translateY(22px);
+  background: linear-gradient(135deg, #35f06e, #22d3ee);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+#fx-intro.fx-go .fx-ch { animation: fxChar .4s ease forwards; animation-delay: var(--d); }
+@keyframes fxChar { to { opacity: 1; transform: translateY(0); } }
+
+#fx-sub { color: #8ba0c4; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  opacity: 0; }
+#fx-intro.fx-go #fx-sub { animation: fxChar .5s ease 1.35s forwards; }
+
+#fx-ring {
+  position: absolute; left: 50%; top: 50%; width: 160px; height: 160px;
+  margin: -80px 0 0 -80px; border-radius: 50%;
+  border: 2px solid #35f06e; opacity: 0; pointer-events: none;
+}
+#fx-intro.fx-go #fx-ring { animation: fxRing .7s ease-out 1.55s forwards; }
+@keyframes fxRing {
+  0%   { opacity: .9; transform: scale(.4); }
+  100% { opacity: 0;  transform: scale(3.2); }
+}
+
+/* ---- Entrata delle card dopo l'intro ---- */
+body.fx-enter .card, body.fx-enter #topbar, body.fx-enter #playbar {
+  animation: fxCardIn .5s cubic-bezier(.2, .9, .3, 1) both;
+  animation-delay: var(--fxd, 0s);
+}
+@keyframes fxCardIn {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- App "viva": micro-interazioni ---- */
+.card { transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+#content .card:hover, #sidebar .card:hover {
+  transform: translateY(-2px);
+  border-color: #2a4a78;
+  box-shadow: 0 6px 22px #0006, 0 0 0 1px #22d3ee22;
+}
+.btn-small { transition: transform .15s ease, background .15s ease, box-shadow .15s ease; }
+.btn-small:hover { transform: translateY(-1px); box-shadow: 0 3px 12px #22d3ee33; }
+.btn-small:active { transform: translateY(0) scale(.97); }
+
+#btn-play { transition: transform .15s ease, box-shadow .2s ease, filter .2s ease; }
+#btn-play:not(:disabled) { animation: fxBreathe 2.6s ease-in-out infinite; }
+#btn-play:not(:disabled):hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.1); }
+#btn-play:not(:disabled):active { transform: scale(.97); }
+@keyframes fxBreathe {
+  0%, 100% { box-shadow: 0 0 14px #16c78444; }
+  50%      { box-shadow: 0 0 30px #16c78488, 0 0 60px #22d3ee22; }
+}
+
+.fx-burst {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  border: 2px solid #35f06e; inset: -4px;
+  animation: fxBurst .5s ease-out forwards;
+}
+@keyframes fxBurst {
+  from { opacity: .8; transform: scale(.9); }
+  to   { opacity: 0;  transform: scale(1.9); }
+}
+
+.dot-green { animation: fxDot 2s ease-in-out infinite; }
+@keyframes fxDot {
+  0%, 100% { box-shadow: 0 0 6px var(--green); }
+  50%      { box-shadow: 0 0 14px var(--green), 0 0 22px #35f06e66; }
+}
+
+#progress-bar { position: relative; overflow: hidden; }
+#progress-bar::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 30%, #ffffff55 50%, transparent 70%);
+  background-size: 220% 100%;
+  animation: fxShimmer 1.4s linear infinite;
+}
+@keyframes fxShimmer { from { background-position: 200% 0; } to { background-position: -60% 0; } }
+
+#status-line.fx-flash { animation: fxStatus .6s ease; }
+@keyframes fxStatus {
+  0% { color: var(--green, #35f06e); text-shadow: 0 0 12px #35f06e66; }
+  100% { color: inherit; text-shadow: none; }
+}
+
+#extras-list .extra:hover, #mod-list li:hover { background: #22d3ee14; }
+
+#fx-mute {
+  background: none; border: none; cursor: pointer; font-size: 15px;
+  color: #8ba0c4; padding: 2px 6px; border-radius: 6px;
+}
+#fx-mute:hover { color: #e9eef6; background: #1b2a49; }
+
+/* ---- Accessibilità: rispetta chi non vuole animazioni ---- */
+@media (prefers-reduced-motion: reduce) {
+  #fx-intro, #fx-bg { display: none !important; }
+  body.fx-enter .card, body.fx-enter #topbar, body.fx-enter #playbar { animation: none !important; }
+  #btn-play:not(:disabled), .dot-green, #progress-bar::after { animation: none !important; }
+  .card, .btn-small, #btn-play { transition: none !important; }
+}
