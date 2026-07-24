@@ -5,14 +5,47 @@ const $ = (id) => document.getElementById(id);
 let state = null;
 let gameState = 'idle';
 
+/* Disegna la testa della skin nell'avatar (8,8 + overlay 40,8 della texture). */
+async function paintAvatar(elId) {
+  const el = $(elId || 'avatar');
+  try {
+    const dataUrl = await ocu.getSkin();
+    if (!dataUrl) return;
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = c.height = 64;
+        const g = c.getContext('2d');
+        g.imageSmoothingEnabled = false;
+        g.drawImage(img, 8, 8, 8, 8, 0, 0, 64, 64);    // testa
+        g.drawImage(img, 40, 8, 8, 8, 0, 0, 64, 64);   // cappello
+        el.style.backgroundImage = 'url(' + c.toDataURL() + ')';
+        el.classList.add('has-skin');
+        el.textContent = '';
+        resolve();
+      };
+      img.onerror = resolve;
+      img.src = dataUrl;
+    });
+  } catch (e) { console.warn('Avatar:', e && e.message); }
+}
+function clearAvatar(elId) {
+  const el = $(elId || 'avatar');
+  el.classList.remove('has-skin');
+  el.style.backgroundImage = '';
+}
+
 function setProfile(profile) {
   if (profile) {
     $('account-name').textContent = profile.name;
     $('avatar').textContent = profile.name.charAt(0).toUpperCase();
+    paintAvatar();
     $('btn-auth').textContent = 'Esci';
     $('btn-play').disabled = gameState !== 'idle' ? true : false;
   } else {
     $('account-name').textContent = 'Non connesso';
+    clearAvatar();
     $('avatar').textContent = '?';
     $('btn-auth').textContent = 'Accedi con Microsoft';
     $('btn-play').disabled = true;
@@ -290,6 +323,21 @@ function initStaff(s) {
   input.addEventListener('change', async () => {
     if (validUsername(input.value.trim())) await ocu.setLocalUsername(input.value.trim());
   });
+
+  // Skin dello staff: si sceglie qui, si carica in gioco con Fabric Tailor.
+  paintAvatar('staff-avatar');
+  const skinBtn = $('staff-skin');
+  if (skinBtn) {
+    skinBtn.addEventListener('click', async () => {
+      const r = await ocu.chooseStaffSkin();
+      if (!r || r.ok === false) {
+        if (r && r.error) setStatus(r.error);
+        return;
+      }
+      await paintAvatar('staff-avatar');
+      setStatus('Skin salvata! In gioco apri la schermata delle skin (Fabric Tailor) e caricala: la vedranno tutti.');
+    });
+  }
 
   if (refresh()) setStatus('Bentornato, ' + input.value.trim() + '! Premi GIOCA.');
   else setStatus('Inserisci il nome utente con cui vuoi entrare.');
