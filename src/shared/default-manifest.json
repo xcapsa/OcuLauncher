@@ -230,7 +230,7 @@
     },
     {
       "slug": "physicsmod",
-      "conflicts": ["entity-model-features", "entitytexturefeatures", "fresh-animations"],
+      "conflicts": ["entity-model-features", "entitytexturefeatures", "fresh-animations", "distanthorizons"],
       "name": "Physics Mod",
       "desc": "Fisica realistica di blocchi e neve",
       "category": "mondo",
