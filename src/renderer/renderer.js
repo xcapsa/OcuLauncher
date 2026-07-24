@@ -66,10 +66,13 @@ function renderExtras() {
     list.appendChild(title);
     for (const m of byCat[cat]) {
       const label = document.createElement('label');
-      label.className = 'extra-item' + (selected.has(m.slug) ? ' checked' : '');
+      const blockers = [...conflictsOf(m.slug)].filter((slug) => selected.has(slug));
+      const isBlocked = !selected.has(m.slug) && blockers.length > 0;
+      label.className = 'extra-item' + (selected.has(m.slug) ? ' checked' : '') + (isBlocked ? ' disabled' : '');
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = selected.has(m.slug);
+      cb.disabled = isBlocked;
       cb.dataset.slug = m.slug;
       cb.addEventListener('change', () => toggleExtra(m, cb.checked));
       const txt = document.createElement('div');
@@ -82,10 +85,11 @@ function renderExtras() {
       desc.className = 'extra-desc';
       desc.textContent = m.desc + (m.sizeMB ? ` · ${m.sizeMB} MB` : '');
       txt.append(name, desc);
-      const blockers = [...conflictsOf(m.slug)].filter((s) => selected.has(s));
       if (blockers.length) {
         const warn = document.createElement('div');
-        warn.textContent = `⚠ Non insieme a ${blockers.map(nameOf).join(', ')}`;
+        warn.textContent = isBlocked
+          ? `Non selezionabile insieme a ${blockers.map(nameOf).join(', ')}`
+          : `⚠ Non insieme a ${blockers.map(nameOf).join(', ')}`;
         warn.style.cssText = 'color:#e0a030;font-size:11px;margin-top:2px;';
         txt.append(warn);
       }
@@ -164,6 +168,12 @@ function resolveExtras(sel, keep) {
 function toggleExtra(mod, on) {
   const sel = new Set(state.settings.extraMods || []);
   if (on) {
+    const blockers = [...conflictsOf(mod.slug)].filter((slug) => sel.has(slug));
+    if (blockers.length) {
+      setStatus(`${mod.name} non può essere selezionata insieme a ${blockers.map(nameOf).join(', ')}.`);
+      renderExtras();
+      return;
+    }
     sel.add(mod.slug);
     for (const req of mod.requires || []) sel.add(req); // dipendenze (es. Fresh Animations → EMF+ETF)
     const keep = new Set([mod.slug, ...(mod.requires || [])]);
