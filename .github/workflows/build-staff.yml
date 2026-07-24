@@ -42,8 +42,18 @@ jobs:
           echo "Edizione staff, versione ${VER} (tag ${GITHUB_REF_NAME})"
 
       - name: Compila e pubblica (pre-release Staff)
-        run: npx electron-builder --config electron-builder-staff.yml ${{ matrix.args }} --publish always
+        run: npx electron-builder --config electron-builder-staff.yml ${{ matrix.args }} --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Carica gli installer nella Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          shopt -s nullglob
+          files=(dist/*.dmg dist/*.zip dist/*.exe dist/*.blockmap dist/latest*.yml)
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
 
