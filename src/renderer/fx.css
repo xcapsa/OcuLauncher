@@ -134,3 +134,18 @@ body.fx-enter .card, body.fx-enter #topbar, body.fx-enter #playbar {
   #btn-play:not(:disabled), .dot-green, #progress-bar::after { animation: none !important; }
   .card, .btn-small, #btn-play { transition: none !important; }
 }
+
+/* ---- Avatar con la skin del giocatore ---- */
+#avatar.has-skin, #staff-avatar.has-skin {
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+  box-shadow: 0 0 0 1px #ffffff18, 0 3px 10px #0006;
+}
+#staff-avatar {
+  width: 46px; height: 46px; border-radius: 10px;
+  background: var(--grad, linear-gradient(135deg, #16c784, #0ea5e9));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 22px; color: #06210f;
+  flex: 0 0 auto;
+}
