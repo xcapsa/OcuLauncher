@@ -182,6 +182,70 @@ function registerIpc() {
     return pingServer(srv.host, srv.port || 25565);
   });
 
+  /* ---- Skin del giocatore ----------------------------------------
+     Pubblica: la scarichiamo dal profilo Mojang (UUID).
+     Staff: file PNG scelto dall'utente e salvato in gameDir/skin.png.
+     Torniamo un data URL: nessun problema di CSP nell'interfaccia.     */
+  let skinCache = { key: null, dataUrl: null };
+  const staffSkinPath = () => path.join(gameDir(), 'skin.png');
+  const toDataUrl = (buf) => 'data:image/png;base64,' + buf.toString('base64');
+
+  ipcMain.handle('get-skin', async () => {
+    try {
+      if (IS_STAFF) {
+        const f = staffSkinPath();
+        return fs.existsSync(f) ? toDataUrl(fs.readFileSync(f)) : null;
+      }
+      const id = account.profile && account.profile.id;
+      if (!id) return null;
+      if (skinCache.key === id && skinCache.dataUrl) return skinCache.dataUrl;
+      const uuid = String(id).replace(/-/g, '');
+      const r = await fetch('https://sessionserver.mojang.com/session/minecraft/profile/' + uuid);
+      if (!r.ok) return null;
+      const prof = await r.json();
+      const prop = (prof.properties || []).find((x) => x.name === 'textures');
+      if (!prop) return null;
+      const tex = JSON.parse(Buffer.from(prop.value, 'base64').toString('utf8'));
+      const url = tex.textures && tex.textures.SKIN && tex.textures.SKIN.url;
+      if (!url) return null;
+      const img = await fetch(url);
+      if (!img.ok) return null;
+      const dataUrl = toDataUrl(Buffer.from(await img.arrayBuffer()));
+      skinCache = { key: id, dataUrl };
+      return dataUrl;
+    } catch (e) {
+      console.warn('Skin:', e && e.message);
+      return null;
+    }
+  });
+
+  // Staff: scegli un PNG dal computer. Lo validiamo e lo salviamo nella
+  // cartella di gioco, pronto da caricare in gioco con Fabric Tailor.
+  ipcMain.handle('choose-staff-skin', async () => {
+    try {
+      const { dialog } = require('electron');
+      const res = await dialog.showOpenDialog(win, {
+        title: 'Scegli la tua skin (PNG 64x64)',
+        filters: [{ name: 'Skin Minecraft', extensions: ['png'] }],
+        properties: ['openFile'],
+      });
+      if (res.canceled || !res.filePaths.length) return { ok: false };
+      const buf = fs.readFileSync(res.filePaths[0]);
+      if (buf.length < 24 || buf.slice(1, 4).toString() !== 'PNG') {
+        return { ok: false, error: 'Il file non è un PNG valido.' };
+      }
+      const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
+      if (w !== 64 || (h !== 64 && h !== 32)) {
+        return { ok: false, error: `Una skin deve essere 64x64 pixel (questa è ${w}x${h}).` };
+      }
+      fs.mkdirSync(gameDir(), { recursive: true });
+      fs.writeFileSync(staffSkinPath(), buf);
+      return { ok: true, dataUrl: toDataUrl(buf), path: staffSkinPath() };
+    } catch (e) {
+      return { ok: false, error: String(e && e.message || e) };
+    }
+  });
+
   ipcMain.handle('open-game-folder', () => shell.openPath(gameDir()));
   ipcMain.handle('open-custom-mods-folder', () => {
     const dir = path.join(gameDir(), 'mods-custom');
