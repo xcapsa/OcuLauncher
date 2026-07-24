@@ -99,6 +99,7 @@ function registerIpc() {
         optionalMods: (manifest.optionalMods || []).map((m) => ({
           slug: m.slug, name: m.name, desc: m.desc, category: m.category,
           heavy: !!m.heavy, type: m.type, requires: m.requires || [],
+          conflicts: m.conflicts || [],
           sizeMB: Math.round(m.files.reduce((a, f) => a + (f.size || 0), 0) / 1e6),
         })),
         source,

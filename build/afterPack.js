@@ -8,6 +8,15 @@ const path = require('path');
 
 exports.default = async function afterPack(context) {
   if (context.electronPlatformName !== 'darwin') return;
+
+  // Se è configurata una vera firma Developer ID/CI, non sovrascriverla con
+  // una firma ad-hoc: serve per Gatekeeper, notarizzazione e aggiornamenti macOS.
+  const hasRealSigning = Boolean(process.env.CSC_LINK || process.env.CSC_NAME || process.env.CSC_IDENTITY_AUTO_DISCOVERY === 'true');
+  if (hasRealSigning) {
+    console.log('[afterPack] firma Developer ID/CI rilevata, salto la firma ad-hoc');
+    return;
+  }
+
   const appName = context.packager.appInfo.productFilename;
   const appPath = path.join(context.appOutDir, `${appName}.app`);
   console.log('[afterPack] firma ad-hoc di', appPath);

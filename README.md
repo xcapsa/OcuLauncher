@@ -42,9 +42,24 @@ Per le versioni successive: alza `version` in `package.json`, commit, nuovo tag 
 
 ¹ Se il repo è privato le release non sono scaricabili pubblicamente e l'auto-update non funziona: meglio pubblico.
 
+## Updates en certificaten
+
+Er zijn **8 build-varianten**: public en staff, elk voor Windows x64, Windows ARM64, macOS Intel en macOS Apple Silicon. De mod-manifest-updates werken voor alle 8 varianten, omdat de modlijst vanaf de VPS wordt opgehaald. De launcher-app zelf werkt anders per platform/editie:
+
+- **Public Windows x64/ARM64**: gebruikt `electron-updater`; de update wordt op de achtergrond gedownload en de speler klikt daarna alleen op **Riavvia e aggiorna**.
+- **Staff Windows x64/ARM64**: krijgt bewust een downloadknop naar de staff pre-release, zodat staff-builds niet per ongeluk met public releases mengen.
+- **macOS Intel/Apple Silicon**: zonder Apple Developer ID kan macOS geen stille, betrouwbare auto-install doen. De knop opent daarom de juiste `.dmg` en de speler installeert die opnieuw.
+
+Een eigen/self-signed certificaat aanmaken helpt **niet** tegen SmartScreen of Gatekeeper voor spelers buiten je eigen beheerde Macs/PC's: het OS vertrouwt alleen certificaten van erkende certificate authorities en, op macOS, een genotariseerde Apple Developer ID-build. Wil je dat spelers niet steeds extra toestemming hoeven geven, dan is dit de juiste route:
+
+1. **Windows code-signing certificaat** kopen (OV of EV). EV geeft meestal sneller vertrouwen bij SmartScreen; OV kan nog reputatie moeten opbouwen.
+2. **Apple Developer Program** nemen, de app signen met **Developer ID Application** en de `.dmg` notarizen.
+3. De signing-/notarization-secrets in GitHub Actions zetten en daarna een nieuwe release-tag publiceren.
+4. Na signing/notarization kan Windows met minder waarschuwingen updaten; macOS kan pas echt gebruiksvriendelijk worden als de app correct Developer-ID-signed en notarized is.
+
 ## Avvisi di sicurezza (app non firmata)
 
-Non avendo certificati a pagamento (Apple Developer ~99 €/anno, certificato Windows ~200-400 €/anno):
+Zolang er geen betaalde, vertrouwde certificaten zijn:
 
 - **Windows**: SmartScreen mostra "PC protetto da Windows" → dire ai giocatori: **Ulteriori informazioni → Esegui comunque**.
 - **macOS**: al primo avvio l'app viene bloccata. Su macOS 15+ (Sequoia): aprire **Impostazioni di Sistema → Privacy e Sicurezza**, scorrere in basso e premere **"Apri comunque"**. Su versioni precedenti basta **clic destro sull'app → Apri → Apri**. Se macOS dice che l'app è "danneggiata": Terminale → `xattr -cr /Applications/OcuLauncher.app`.
