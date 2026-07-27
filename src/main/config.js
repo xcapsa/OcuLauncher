@@ -8,6 +8,10 @@ module.exports = {
   MANIFEST_URL: 'https://minecraft.oculandiavr.it/launcher/manifest.json',
   // Timeout per il download del manifest (ms). Se scade si usa l'ultima copia in cache.
   MANIFEST_TIMEOUT: 6000,
+  // Chat in sola lettura: file JSON pubblicato dal VPS con gli ultimi messaggi
+  // del gioco e del gruppo Telegram (ponte tgbridge). Nessun token nel client.
+  CHAT_URL: 'https://minecraft.oculandiavr.it/launcher/chat.json',
+  CHAT_TIMEOUT: 5000,
   // API Adoptium per scaricare il runtime Java (Temurin JRE).
   ADOPTIUM_API: 'https://api.adoptium.net/v3/assets/latest/{major}/hotspot?os={os}&architecture={arch}&image_type=jre',
   // Meta Fabric per il profilo del loader.

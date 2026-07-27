@@ -141,6 +141,41 @@ async function ensureFabric(gameDir, mcVersion, loaderVersion, onStatus) {
 /* Mod                                                                 */
 /* ------------------------------------------------------------------ */
 
+/** Piattaforma del dispositivo: { os: win|mac|linux, arch: x64|arm64, key: "mac-arm64" }. */
+function platformKey() {
+  const osName = process.platform === 'win32' ? 'win'
+    : process.platform === 'darwin' ? 'mac' : 'linux';
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+  return { os: osName, arch, key: osName + '-' + arch };
+}
+
+/**
+ * Una voce del manifest (mod obbligatoria o opzionale) puo` dichiarare su quali
+ * dispositivi ha senso installarla, con il campo facoltativo `platforms`:
+ *   "platforms": ["win", "mac-arm64", "linux-x64"]
+ * Sono ammessi sia il sistema da solo ("win", "mac", "linux") sia sistema+architettura.
+ * Campo assente o vuoto = disponibile ovunque (comportamento storico).
+ */
+function supportsPlatform(entry, plat) {
+  const list = entry && entry.platforms;
+  if (!Array.isArray(list) || list.length === 0) return true;
+  const p = plat || platformKey();
+  return list.some((v) => {
+    const s = String(v || '').toLowerCase().trim();
+    return s === p.os || s === p.key;
+  });
+}
+
+/** Mod obbligatorie valide per questo dispositivo. */
+function platformMods(manifest, plat) {
+  return (manifest.mods || []).filter((m) => supportsPlatform(m, plat));
+}
+
+/** Mod opzionali valide per questo dispositivo. */
+function platformOptionalMods(manifest, plat) {
+  return (manifest.optionalMods || []).filter((m) => supportsPlatform(m, plat));
+}
+
 function modApplies(mod, vrMode) {
   const tags = mod.tags || [];
   if (tags.includes('vr') && !vrMode) return false;
@@ -149,7 +184,8 @@ function modApplies(mod, vrMode) {
 
 /** Espande la selezione di mod opzionali con i loro `requires`. */
 function expandExtraSelection(manifest, extraSlugs) {
-  const bySlug = new Map((manifest.optionalMods || []).map((m) => [m.slug, m]));
+  // Le mod non compatibili con questo dispositivo non entrano mai nella selezione.
+  const bySlug = new Map(platformOptionalMods(manifest).map((m) => [m.slug, m]));
   const selected = new Set();
   const queue = [...(extraSlugs || [])];
   while (queue.length) {
@@ -175,7 +211,7 @@ async function syncMods(gameDir, manifest, settings, onStatus) {
 
   // Elenco piatto di file voluti: [{filename,url,sha1,size,dir,label}]
   const wantedFiles = new Map(); // filename -> file (dedup di dipendenze comuni)
-  for (const mod of manifest.mods.filter((m) => modApplies(m, settings.vrMode))) {
+  for (const mod of platformMods(manifest).filter((m) => modApplies(m, settings.vrMode))) {
     wantedFiles.set(mod.filename, { ...mod, dir: 'mods', label: mod.name });
   }
   for (const entry of extras) {
@@ -380,4 +416,70 @@ async function launchGame({ gameDir, manifest, authorization, settings, onStatus
   return launcher;
 }
 
-module.exports = { getManifest, ensureJava, ensureFabric, syncMods, seedGameFiles, launchGame, javaPlatform, computeAutoRam };
+/* ------------------------------------------------------------------ */
+/* Ripristino delle mod                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Riporta la cartella mod a zero:
+ *  - sposta i .jar personali da mods-custom/ in mods-custom-backup-<data>/
+ *    (niente viene distrutto: se e` stato un errore, i file sono ancora li`);
+ *  - svuota mods/ di tutti i .jar (le mod ufficiali si riscaricano al prossimo GIOCA);
+ *  - lascia intatti mondi, opzioni, shaderpack e resourcepack.
+ * Non lancia mai: ritorna un riepilogo di cosa e` stato fatto.
+ */
+function resetMods(gameDir) {
+  const out = { ok: true, removed: 0, backedUp: 0, backupDir: null, errors: [] };
+  const modsDir = path.join(gameDir, 'mods');
+  const customDir = path.join(gameDir, 'mods-custom');
+
+  // 1) backup delle mod personali
+  try {
+    const jars = fs.existsSync(customDir)
+      ? fs.readdirSync(customDir).filter((f) => f.toLowerCase().endsWith('.jar'))
+      : [];
+    if (jars.length) {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+      let dir = path.join(gameDir, 'mods-custom-backup-' + stamp);
+      let n = 2;
+      while (fs.existsSync(dir)) dir = path.join(gameDir, `mods-custom-backup-${stamp}-${n++}`);
+      fs.mkdirSync(dir, { recursive: true });
+      for (const jar of jars) {
+        try {
+          fs.renameSync(path.join(customDir, jar), path.join(dir, jar));
+          out.backedUp++;
+        } catch (e) {
+          try { fs.copyFileSync(path.join(customDir, jar), path.join(dir, jar)); fs.rmSync(path.join(customDir, jar), { force: true }); out.backedUp++; }
+          catch (e2) { out.errors.push(jar + ': ' + (e2 && e2.message)); }
+        }
+      }
+      out.backupDir = dir;
+    }
+    fs.mkdirSync(customDir, { recursive: true });
+  } catch (e) {
+    out.errors.push('backup: ' + (e && e.message));
+  }
+
+  // 2) svuota mods/
+  try {
+    fs.mkdirSync(modsDir, { recursive: true });
+    for (const f of fs.readdirSync(modsDir)) {
+      if (!f.toLowerCase().endsWith('.jar')) continue;
+      try { fs.rmSync(path.join(modsDir, f), { force: true }); out.removed++; }
+      catch (e) { out.errors.push(f + ': ' + (e && e.message)); }
+    }
+  } catch (e) {
+    out.errors.push('mods: ' + (e && e.message));
+  }
+
+  if (out.errors.length) out.ok = false;
+  return out;
+}
+
+module.exports = {
+  getManifest, ensureJava, ensureFabric, syncMods, seedGameFiles, launchGame,
+  javaPlatform, computeAutoRam, platformKey, supportsPlatform, platformMods, platformOptionalMods,
+  resetMods,
+};

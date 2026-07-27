@@ -3,9 +3,10 @@ const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const config = require('./config');
+const { fetchJson } = require('./download');
 const { Settings } = require('./settings');
 const { Account } = require('./auth');
-const { getManifest, launchGame, computeAutoRam } = require('./launcher');
+const { getManifest, launchGame, computeAutoRam, platformKey, platformMods, platformOptionalMods, resetMods } = require('./launcher');
 const { pingServer } = require('./serverping');
 const { isValidUsername, localAuthorization } = require('./localauth');
 const os = require('os');
@@ -87,6 +88,11 @@ function sendGameState(state) {
 function registerIpc() {
   ipcMain.handle('get-state', async () => {
     const { manifest, source } = await getManifestCached();
+    // Mod non adatte a questo dispositivo (es. Vivecraft su Mac: la VR non
+    // esiste su macOS): non le mostriamo nemmeno, cosi` il catalogo resta pulito.
+    const plat = platformKey();
+    const baseMods = platformMods(manifest, plat);
+    const optMods = platformOptionalMods(manifest, plat);
     return {
       profile: account.profile,
       settings: settings.get(),
@@ -95,8 +101,8 @@ function registerIpc() {
         fabricLoader: manifest.fabricLoader,
         news: manifest.news || '',
         server: manifest.server,
-        mods: manifest.mods.map((m) => ({ name: m.name, tags: m.tags || [] })),
-        optionalMods: (manifest.optionalMods || []).map((m) => ({
+        mods: baseMods.map((m) => ({ name: m.name, tags: m.tags || [] })),
+        optionalMods: optMods.map((m) => ({
           slug: m.slug, name: m.name, desc: m.desc, category: m.category,
           heavy: !!m.heavy, type: m.type, requires: m.requires || [],
           conflicts: m.conflicts || [],   // senza questo il resolver dei conflitti gira a vuoto
@@ -108,6 +114,9 @@ function registerIpc() {
       autoRamMB: computeAutoRam(manifest, settings.get().extraMods),
       version: app.getVersion(),
       edition: EDITION,
+      platform: plat,
+      hiddenMods: (manifest.mods || []).length - baseMods.length
+        + ((manifest.optionalMods || []).length - optMods.length),
       update: pendingUpdate,
       links: { website: config.WEBSITE_URL, map: config.MAP_URL, rules: config.RULES_URL },
     };
@@ -244,6 +253,76 @@ function registerIpc() {
     } catch (e) {
       return { ok: false, error: String(e && e.message || e) };
     }
+  });
+
+  /* ---- Ripristino delle mod --------------------------------------
+     Azione distruttiva: chiediamo conferma DUE volte, e la seconda dice
+     esplicitamente che spariscono anche le mod personali. Per sicurezza i
+     jar personali non vengono cancellati ma spostati in una cartella di
+     backup datata dentro la cartella di gioco.                        */
+  ipcMain.handle('reset-mods', async () => {
+    const { dialog } = require('electron');
+    if (gameRunning) {
+      return { ok: false, error: 'Chiudi prima Minecraft: non posso toccare le mod mentre il gioco gira.' };
+    }
+    const first = await dialog.showMessageBox(win, {
+      type: 'warning',
+      buttons: ['Annulla', 'Continua'],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+      title: 'Ripristina tutte le mod',
+      message: 'Sei sicuro di voler ripristinare tutte le mod?',
+      detail: 'Svuoto la cartella delle mod. Quelle ufficiali del server vengono riscaricate da sole al prossimo GIOCA, con le stesse mod extra che hai scelto.\n\nMondi, opzioni, shader e pacchetti risorse non si toccano.',
+    });
+    if (first.response !== 1) return { ok: false, canceled: true };
+
+    const second = await dialog.showMessageBox(win, {
+      type: 'warning',
+      buttons: ['Annulla', 'Sì, cancella tutto'],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+      title: 'Confermi al 100%?',
+      message: 'Attenzione: cancella anche "Le tue mod". Azione irreversibile.',
+      detail: 'La libreria delle tue mod personali resterà VUOTA. I .jar non vengono distrutti: li sposto in una cartella mods-custom-backup-<data> dentro la cartella di gioco, così puoi recuperarli a mano.\n\nProcedo?',
+    });
+    if (second.response !== 1) return { ok: false, canceled: true };
+
+    const r = resetMods(gameDir());
+    if (r.ok) {
+      sendStatus(`Mod ripristinate: rimossi ${r.removed} file, ${r.backedUp} mod personali messe al sicuro nel backup.`);
+    }
+    return r;
+  });
+
+  ipcMain.handle('open-mods-backup', () => shell.openPath(gameDir()));
+
+  /* ---- Chat (sola lettura) ---------------------------------------
+     Il launcher NON parla con Telegram: legge un file JSON pubblicato dal
+     VPS, dove un servizio raccoglie gli ultimi messaggi del gioco e del
+     gruppo. Cosi` nessun token di bot finisce dentro l'app (il repo e`
+     pubblico: un token dentro l'app sarebbe rubabile da chiunque).      */
+  let chatCache = { at: 0, data: null };
+  ipcMain.handle('get-chat', async () => {
+    if (chatCache.data && Date.now() - chatCache.at < 10000) return chatCache.data;
+    try {
+      const raw = await fetchJson(config.CHAT_URL, config.CHAT_TIMEOUT);
+      const list = Array.isArray(raw) ? raw : (raw && raw.messages) || [];
+      const messages = list
+        .filter((m) => m && (m.text || m.msg))
+        .slice(-40)
+        .map((m) => ({
+          from: String(m.from || m.name || '?').slice(0, 32),
+          text: String(m.text || m.msg || '').slice(0, 300),
+          time: String(m.time || '').slice(0, 8),
+          src: m.src === 'telegram' ? 'telegram' : 'gioco',
+        }));
+      chatCache = { at: Date.now(), data: { ok: true, messages } };
+    } catch (e) {
+      chatCache = { at: Date.now(), data: { ok: false, messages: [], error: String(e && e.message || e) } };
+    }
+    return chatCache.data;
   });
 
   ipcMain.handle('open-game-folder', () => shell.openPath(gameDir()));
