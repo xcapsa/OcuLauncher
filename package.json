@@ -1,6 +1,6 @@
 {
   "name": "oculauncher",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "OcuLauncher — il launcher ufficiale di Oculandia VR: installa e avvia Minecraft con tutte le mod giuste, automaticamente.",
   "main": "src/main/main.js",
   "scripts": {
