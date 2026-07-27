@@ -223,6 +223,50 @@ async function updateAutoRamLabel() {
   $('ram-auto-label').textContent = `(${(auto / 1024).toFixed(1)} GB su questo PC)`;
 }
 
+/* ---- Chat in sola lettura (gioco + Telegram) ----
+   I messaggi arrivano da un file JSON pubblicato dal VPS. Se l'endpoint non
+   esiste ancora o il VPS e` giu`, la card resta semplicemente nascosta: la
+   chat non deve mai poter rompere il launcher.                            */
+let chatSeen = '';
+async function refreshChat() {
+  const card = $('chat-card');
+  if (!card) return;
+  try {
+    const r = await ocu.getChat();
+    if (!r || !r.ok || !r.messages || !r.messages.length) {
+      if (!chatSeen) card.classList.add('hidden');
+      return;
+    }
+    const key = r.messages.map((m) => m.time + m.from + m.text).join('|');
+    if (key === chatSeen) { card.classList.remove('hidden'); return; }
+    chatSeen = key;
+    const list = $('chat-list');
+    list.innerHTML = '';
+    for (const m of r.messages.slice(-12)) {
+      const row = document.createElement('div');
+      row.className = 'chat-msg' + (m.src === 'telegram' ? ' tg' : '');
+      const who = document.createElement('span');
+      who.className = 'chat-from';
+      who.textContent = m.from + ': ';
+      const txt = document.createElement('span');
+      txt.textContent = m.text;           // textContent: niente HTML dai messaggi
+      row.append(who, txt);
+      if (m.time) {
+        const t = document.createElement('span');
+        t.className = 'chat-time';
+        t.textContent = m.time.slice(0, 5);
+        row.append(t);
+      }
+      list.appendChild(row);
+    }
+    $('chat-meta').textContent = `(${Math.min(12, r.messages.length)})`;
+    card.classList.remove('hidden');
+    list.scrollTop = list.scrollHeight;
+  } catch (e) {
+    console.warn('Chat:', e && e.message);
+  }
+}
+
 async function refreshPing() {
   const r = await ocu.pingServer();
   const el = $('server-status');
@@ -253,7 +297,15 @@ async function init() {
   $('ram-label').textContent = (s.ramMB / 1024).toFixed(1) + ' GB';
   $('ram-auto').checked = s.ramAuto !== false;
   $('ram-manual-row').classList.toggle('hidden', s.ramAuto !== false);
-  $('vr-mode').checked = !!s.vrMode;
+  // La modalita` VR ha senso solo se il manifest prevede una mod VR per questo
+  // dispositivo (su macOS Vivecraft non c'e`: SteamVR non esiste su Mac).
+  const hasVr = (state.manifest.mods || []).some((m) => (m.tags || []).includes('vr'));
+  $('vr-mode').checked = hasVr && !!s.vrMode;
+  if (!hasVr) {
+    const row = $('vr-mode').closest('label');
+    if (row) row.style.display = 'none';
+    if (s.vrMode) ocu.setSettings({ vrMode: false });
+  }
   $('keep-open').checked = !!s.keepOpen;
   $('custom-mods').checked = s.customMods !== false;
   // Ripulisce le scelte salvate non più valide: chi arriva da una versione
@@ -289,6 +341,8 @@ async function init() {
 
   refreshPing();
   setInterval(refreshPing, 30000);
+  refreshChat();
+  setInterval(refreshChat, 20000);
 }
 
 /* ---- Edizione Staff: accesso locale con nome utente ---- */
@@ -453,6 +507,32 @@ $('custom-open').addEventListener('click', (ev) => {
   ocu.openCustomModsFolder();
   setStatus('Ho aperto la cartella "Le tue mod": trascina qui i tuoi .jar (solo lato client), poi premi GIOCA.');
 });
+
+/* ---- Ripristina tutte le mod (le due conferme le mostra il processo main) ---- */
+const resetBtn = $('mods-reset');
+if (resetBtn) {
+  resetBtn.addEventListener('click', async (ev) => {
+    ev.preventDefault();
+    resetBtn.disabled = true;
+    try {
+      const r = await ocu.resetMods();
+      if (!r || r.canceled) {
+        setStatus('Ripristino annullato: non ho toccato niente.');
+      } else if (r.ok) {
+        const parts = [`Ripristino completato: rimosse ${r.removed} mod installate`];
+        if (r.backedUp) parts.push(`${r.backedUp} mod personali salvate in ${r.backupDir ? r.backupDir.split(/[\\/]/).pop() : 'backup'}`);
+        parts.push('premi GIOCA per riscaricare le mod ufficiali');
+        setStatus(parts.join(' · ') + '.');
+      } else {
+        setStatus('Ripristino non riuscito: ' + (r.error || (r.errors || []).join('; ')));
+      }
+    } catch (e) {
+      setStatus('Ripristino non riuscito: ' + (e && e.message));
+    } finally {
+      resetBtn.disabled = false;
+    }
+  });
+}
 
 document.querySelectorAll('.ext-link').forEach((a) => {
   a.addEventListener('click', (ev) => {

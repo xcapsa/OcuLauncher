@@ -14,6 +14,18 @@
     #update-text{flex:1;font-size:.92rem}
     .forgot-pass{display:inline-block;margin-top:4px;font-size:.78rem;color:#8b9aac;text-decoration:underline dotted;cursor:pointer}
     .forgot-pass:hover{color:#e9eef6}
+    /* Chat in sidebar (sola lettura) */
+    #chat-card.hidden{display:none}
+    #chat-list{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-top:4px}
+    .chat-msg{font-size:.76rem;line-height:1.25;color:#c8d3e0;word-break:break-word}
+    .chat-from{color:#35f06e;font-weight:600}
+    .chat-msg.tg .chat-from{color:#4aa8ff}
+    .chat-time{color:#5d6b7d;font-size:.68rem;margin-left:4px}
+    .chat-foot{font-size:.7rem;margin-top:6px;opacity:.7}
+    .chat-empty{font-size:.76rem;color:#8b9aac}
+    /* Azione distruttiva */
+    .btn-danger{border-color:rgba(224,80,80,.45)!important;color:#ff9a9a!important}
+    .btn-danger:hover{background:rgba(224,80,80,.12)!important}
   </style>
 </head>
 <body>
@@ -38,6 +50,12 @@
         <a href="#" class="ext-link" data-link="map">🗺 Mappa online</a>
         <a href="#" class="ext-link" data-link="rules">📜 Regole del server</a>
         <a href="#" id="open-folder">📁 Cartella di gioco</a>
+      </div>
+
+      <div class="card hidden" id="chat-card">
+        <div class="card-title">💬 Chat <span class="muted" id="chat-meta"></span></div>
+        <div id="chat-list"></div>
+        <div class="muted chat-foot">Gioco + Telegram · sola lettura</div>
       </div>
 
       <div class="sidebar-footer">
@@ -119,6 +137,7 @@
           </label>
           <div class="extras-actions">
             <button class="btn-small" id="custom-open">📁 Apri cartella "Le tue mod"</button>
+            <button class="btn-small btn-danger" id="mods-reset" title="Svuota le mod installate e la libreria personale (con backup)">♻️ Ripristina tutte le mod</button>
             <span class="muted" id="custom-hint">Metti qui i tuoi .jar (solo lato client). Non supportate: potrebbero causare crash o problemi col server. Al prossimo GIOCA vengono caricate.</span>
           </div>
         </section>
