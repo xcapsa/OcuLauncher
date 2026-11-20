@@ -6,7 +6,7 @@ const config = require('./config');
 const { fetchJson } = require('./download');
 const { Settings } = require('./settings');
 const { Account } = require('./auth');
-const { getManifest, launchGame, computeAutoRam, platformKey, platformMods, platformOptionalMods, resetMods } = require('./launcher');
+const { getManifest, launchGame, computeAutoRam, platformKey, platformMods, platformOptionalMods, customModsDirectory, resetMods } = require('./launcher');
 const { pingServer } = require('./serverping');
 const { isValidUsername, localAuthorization } = require('./localauth');
 const os = require('os');
@@ -118,7 +118,12 @@ function registerIpc() {
       hiddenMods: (manifest.mods || []).length - baseMods.length
         + ((manifest.optionalMods || []).length - optMods.length),
       update: pendingUpdate,
-      links: { website: config.WEBSITE_URL, map: config.MAP_URL, rules: config.RULES_URL },
+      links: {
+        website: config.WEBSITE_URL,
+        access: config.ACCESS_URL,
+        map: config.MAP_URL,
+        rules: config.RULES_URL,
+      },
     };
   });
 
@@ -289,7 +294,8 @@ function registerIpc() {
     });
     if (second.response !== 1) return { ok: false, canceled: true };
 
-    const r = resetMods(gameDir());
+    const { manifest } = await getManifestCached();
+    const r = resetMods(gameDir(), manifest);
     if (r.ok) {
       sendStatus(`Mod ripristinate: rimossi ${r.removed} file, ${r.backedUp} mod personali messe al sicuro nel backup.`);
     }
@@ -326,8 +332,9 @@ function registerIpc() {
   });
 
   ipcMain.handle('open-game-folder', () => shell.openPath(gameDir()));
-  ipcMain.handle('open-custom-mods-folder', () => {
-    const dir = path.join(gameDir(), 'mods-custom');
+  ipcMain.handle('open-custom-mods-folder', async () => {
+    const { manifest } = await getManifestCached();
+    const dir = customModsDirectory(gameDir(), manifest.minecraft);
     try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
     return shell.openPath(dir);
   });
@@ -376,7 +383,9 @@ function registerIpc() {
           if (!settings.get().keepOpen && win && !win.isDestroyed()) win.minimize();
         }
       });
-      launcher.on('debug', (m) => console.log('[MCLC]', m));
+      launcher.on('debug', (message) => {
+        if (!String(message).includes('Launching with arguments')) console.log(message);
+      });
       launcher.on('close', (code) => {
         gameRunning = false;
         sendStatus(code === 0 || code === null ? 'Partita terminata.' : `Minecraft si è chiuso (codice ${code}).`);

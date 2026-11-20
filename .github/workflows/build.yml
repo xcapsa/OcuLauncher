@@ -58,4 +58,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release edit "$GITHUB_REF_NAME" --prerelease=false --latest
+        run: |
+          draft="$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft)"
+          if [[ "$draft" == "false" ]]; then
+            gh release edit "$GITHUB_REF_NAME" --prerelease=false --latest
+          fi

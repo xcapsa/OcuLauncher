@@ -5,7 +5,7 @@
 # Niente domini nuovi, niente servizi nuovi.
 #
 #   - /scarica                → pagina download (scarica.html)
-#   - /launcher/manifest.json → elenco mod che il launcher scarica a ogni avvio
+#   - /launcher/manifest-26.3.json → elenco mod che il launcher scarica a ogni avvio
 #
 # Da eseguire come root sul VPS, con manifest.json e scarica.html nella stessa
 # cartella di questo script.
@@ -35,9 +35,9 @@ if [[ -f "$DOCROOT/regole" && ! -f "$DOCROOT/regole.html" ]]; then
   cp "$HERE/scarica.html" "$DOCROOT/scarica"
 fi
 mkdir -p "$DOCROOT/launcher"
-cp "$HERE/manifest.json" "$DOCROOT/launcher/manifest.json"
+cp "$HERE/manifest.json" "$DOCROOT/launcher/manifest-26.3.json"
 chmod -R a+rX "$DOCROOT/launcher" "$DOCROOT/scarica.html" 2>/dev/null || true
-echo "Copiato. Per aggiornare le mod dei giocatori in futuro: modifica $DOCROOT/launcher/manifest.json"
+echo "Copiato. Per aggiornare le mod dei giocatori in futuro: modifica $DOCROOT/launcher/manifest-26.3.json"
 
 echo "== 3/3 Verifico la route Traefik =="
 ROUTE_FILE="$(grep -rl 'minecraft.oculandiavr.it' "$DYN" 2>/dev/null | head -1 || true)"
@@ -60,4 +60,4 @@ fi
 echo
 echo "Verifica tra qualche secondo:"
 echo "  curl -I https://minecraft.oculandiavr.it/scarica"
-echo "  curl -I https://minecraft.oculandiavr.it/launcher/manifest.json"
+echo "  curl -I https://minecraft.oculandiavr.it/launcher/manifest-26.3.json"

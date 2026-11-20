@@ -8,7 +8,7 @@ Il launcher ufficiale di **Oculandia VR**: un unico programma per Windows e Mac 
 2. Scarica da solo **Java 21**, **Minecraft 1.21.5**, **Fabric 0.19.3** e le **mod del server** (Fabric API, Sodium, Lithium, FerriteCore, ImmediatelyFast, Entity Culling, Simple Voice Chat — e Vivecraft se attivi la **Modalità VR**).
 3. **Esperienza immersiva a scelta**: 19 mod extra curate tra le più scaricate di Modrinth (shader Iris + Complementary, Fresh Animations, suoni realistici, Distant Horizons, Physics Mod…), attivabili con una spunta nel launcher — dipendenze risolte automaticamente, shader e resource pack scaricati nelle cartelle giuste.
 4. **Memoria automatica**: il launcher calcola da solo la RAM giusta in base al PC (metà della totale, 3–8 GB, fino a 12 GB con le mod pesanti), oppure regolazione manuale con lo slider.
-5. Verifica i file (checksum SHA-1) e **si tiene aggiornato**: la lista mod arriva da `https://minecraft.oculandiavr.it/launcher/manifest.json`, quindi quando aggiorni il server basta cambiare quel file e tutti i giocatori ricevono le mod nuove al prossimo avvio.
+5. Verifica i file (checksum SHA-1) e **si tiene aggiornato**: la lista mod arriva da `https://minecraft.oculandiavr.it/launcher/manifest-26.3.json`, quindi quando aggiorni il server basta cambiare quel file e tutti i giocatori ricevono le mod nuove al prossimo avvio.
 6. Entra **direttamente nel server** `minecraft.oculandiavr.it` (Quick Play).
 7. Tutto in una cartella separata (`%APPDATA%/OcuLauncher` su Windows, `~/Library/Application Support/OcuLauncher` su Mac): non tocca il Minecraft "normale" del giocatore.
 8. Il launcher **si aggiorna da solo** tramite le GitHub Releases (Windows; su Mac senza firma Apple l'auto-update non è possibile, si riscarica il .dmg).

@@ -5,7 +5,7 @@
 module.exports = {
   APP_NAME: 'OcuLauncher',
   // Manifest remoto: elenco mod + versioni. Servito dal sito Oculandia (nginx oculandia-web).
-  MANIFEST_URL: 'https://minecraft.oculandiavr.it/launcher/manifest.json',
+  MANIFEST_URL: 'https://minecraft.oculandiavr.it/launcher/manifest-26.3.json',
   // Timeout per il download del manifest (ms). Se scade si usa l'ultima copia in cache.
   MANIFEST_TIMEOUT: 6000,
   // Chat in sola lettura: file JSON pubblicato dal VPS con gli ultimi messaggi
@@ -16,10 +16,11 @@ module.exports = {
   ADOPTIUM_API: 'https://api.adoptium.net/v3/assets/latest/{major}/hotspot?os={os}&architecture={arch}&image_type=jre',
   // Meta Fabric per il profilo del loader.
   FABRIC_PROFILE_URL: 'https://meta.fabricmc.net/v2/versions/loader/{mc}/{loader}/profile/json',
-  // Sito della community (link nel launcher).
-  WEBSITE_URL: 'https://minecraft.oculandiavr.it',
-  MAP_URL: 'https://map.oculandiavr.it',
-  RULES_URL: 'https://minecraft.oculandiavr.it/regole',
+  // Collegamenti Minecraft nel launcher.
+  WEBSITE_URL: 'https://oculandiavr.it/minecraft',
+  ACCESS_URL: 'https://oculandiavr.it/minecraft#minecraft-access',
+  MAP_URL: 'https://map.oculandiavr.it/',
+  RULES_URL: 'https://minecraft.oculandiavr.it/regole/',
   // Repo GitHub delle release (aggiornamenti del launcher).
   GITHUB_REPO: 'xcapsa/OcuLauncher',
   // Bot Telegram per il reset della password EasyAuth ("reset NomeMinecraft").

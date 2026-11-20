@@ -7,6 +7,8 @@ const extractZip = require('extract-zip');
 const tar = require('tar');
 const nbt = require('prismarine-nbt');
 const config = require('./config');
+const bundledManifest = require('../shared/default-manifest.json');
+const { prepareMinecraftRuntime } = require('./minecraft-runtime');
 const { downloadFile, fileSha1, fetchJson } = require('./download');
 
 /* ------------------------------------------------------------------ */
@@ -18,10 +20,12 @@ const { downloadFile, fileSha1, fetchJson } = require('./download');
  * l'ultima copia scaricata (cache) e infine quella inclusa nel launcher.
  */
 async function getManifest(gameDir) {
-  const cacheFile = path.join(gameDir, 'manifest-cache.json');
+  const cacheFile = path.join(gameDir, `manifest-${bundledManifest.minecraft}-cache.json`);
   try {
     const m = await fetchJson(config.MANIFEST_URL, config.MANIFEST_TIMEOUT);
-    if (!m || !Array.isArray(m.mods)) throw new Error('manifest non valido');
+    if (m?.minecraft !== bundledManifest.minecraft || !Array.isArray(m.mods)) {
+      throw new Error('manifest non compatibile con questa versione del launcher');
+    }
     fs.mkdirSync(gameDir, { recursive: true });
     fs.writeFileSync(cacheFile, JSON.stringify(m, null, 2));
     return { manifest: m, source: 'remote' };
@@ -30,7 +34,7 @@ async function getManifest(gameDir) {
     try {
       return { manifest: JSON.parse(fs.readFileSync(cacheFile, 'utf8')), source: 'cache' };
     } catch (_) {
-      return { manifest: require('../shared/default-manifest.json'), source: 'bundled' };
+      return { manifest: bundledManifest, source: 'bundled' };
     }
   }
 }
@@ -69,13 +73,14 @@ function findJavaExecutable(rootDir) {
  */
 async function ensureJava(gameDir, javaMajor, onStatus) {
   const { osName, arch } = javaPlatform();
-  const runtimeDir = path.join(gameDir, 'runtime', `temurin-${javaMajor}-${arch}`);
-  const markerFile = path.join(runtimeDir, '.ok');
+  const runtimeRoot = path.join(gameDir, 'runtime');
+  const runtimePath = (targetArch) => path.join(runtimeRoot, `temurin-${javaMajor}-${targetArch}`);
+  const cachedJava = (targetArch) => fs.existsSync(path.join(runtimePath(targetArch), '.ok'))
+    && findJavaExecutable(runtimePath(targetArch));
 
-  if (fs.existsSync(markerFile)) {
-    const cached = findJavaExecutable(runtimeDir);
-    if (cached) return cached;
-  }
+  const cached = cachedJava(arch);
+  if (cached) return { executable: cached, arch };
+  let javaArch = arch;
 
   onStatus('Preparo Java ' + javaMajor + '…');
   const apiUrl = config.ADOPTIUM_API
@@ -83,9 +88,12 @@ async function ensureJava(gameDir, javaMajor, onStatus) {
 
   let assets = [];
   try { assets = await fetchJson(apiUrl); } catch (e) { console.warn('Adoptium:', e.message); }
-  if (!assets.length && arch === 'aarch64') {
+  if (!assets.length && osName === 'windows' && arch === 'aarch64') {
     // Fallback: su Windows ARM senza build native si usa x64 in emulazione.
     onStatus('Java nativo ARM non trovato, uso la versione x64…');
+    javaArch = 'x64';
+    const fallback = cachedJava(javaArch);
+    if (fallback) return { executable: fallback, arch: javaArch };
     try {
       assets = await fetchJson(config.ADOPTIUM_API
         .replace('{major}', javaMajor).replace('{os}', osName).replace('{arch}', 'x64'));
@@ -94,7 +102,8 @@ async function ensureJava(gameDir, javaMajor, onStatus) {
   if (!assets.length) throw new Error('Impossibile trovare un runtime Java da scaricare. Controlla la connessione.');
 
   const pkg = assets[0].binary.package;
-  const archive = path.join(gameDir, 'runtime', pkg.name);
+  const runtimeDir = runtimePath(javaArch);
+  const archive = path.join(runtimeRoot, pkg.name);
   onStatus('Scarico Java (' + Math.round(pkg.size / 1e6) + ' MB)…');
   await downloadFile(pkg.link, archive, {
     onProgress: (done, total) => onStatus('Scarico Java… ' + Math.round((done / total) * 100) + '%', done / total),
@@ -113,8 +122,8 @@ async function ensureJava(gameDir, javaMajor, onStatus) {
   const javaExe = findJavaExecutable(runtimeDir);
   if (!javaExe) throw new Error('Runtime Java estratto ma eseguibile non trovato.');
   if (process.platform !== 'win32') fs.chmodSync(javaExe, 0o755);
-  fs.writeFileSync(markerFile, new Date().toISOString());
-  return javaExe;
+  fs.writeFileSync(path.join(runtimeDir, '.ok'), new Date().toISOString());
+  return { executable: javaExe, arch: javaArch };
 }
 
 /* ------------------------------------------------------------------ */
@@ -198,6 +207,10 @@ function expandExtraSelection(manifest, extraSlugs) {
   return [...selected].map((s) => bySlug.get(s));
 }
 
+function customModsDirectory(gameDir, minecraft) {
+  return path.join(gameDir, 'mods-custom', minecraft);
+}
+
 const SUBDIR_BY_TYPE = { mod: 'mods', shaderpack: 'shaderpacks', resourcepack: 'resourcepacks' };
 
 /**
@@ -235,8 +248,8 @@ async function syncMods(gameDir, manifest, settings, onStatus) {
   // mods/: rimuovi ogni jar non voluto. Altre cartelle: solo i file gestiti.
   const modsDir = path.join(gameDir, 'mods');
   fs.mkdirSync(modsDir, { recursive: true });
-  // Mod aggiunte dal giocatore: jar in mods-custom/ (incluse ma NON gestite/verificate).
-  const customDir = path.join(gameDir, 'mods-custom');
+  // Ogni versione carica solo i jar scelti dal giocatore per quella versione.
+  const customDir = customModsDirectory(gameDir, manifest.minecraft);
   fs.mkdirSync(customDir, { recursive: true });
   const customJars = settings.customMods === false ? []
     : fs.readdirSync(customDir).filter((f) => f.endsWith('.jar'));
@@ -377,8 +390,9 @@ function seedGameFiles(gameDir, manifest) {
 async function launchGame({ gameDir, manifest, authorization, settings, onStatus }) {
   seedGameFiles(gameDir, manifest); // solo al primissimo avvio (file mancanti)
   ensureOculandiaServer(gameDir, manifest); // ogni avvio: ripristina Oculandia se sparito
-  const javaExe = await ensureJava(gameDir, manifest.javaMajor || 21, onStatus);
+  const java = await ensureJava(gameDir, manifest.javaMajor, onStatus);
   const versionId = await ensureFabric(gameDir, manifest.minecraft, manifest.fabricLoader, onStatus);
+  const runtime = await prepareMinecraftRuntime(gameDir, manifest.minecraft, versionId, java.arch, onStatus);
   await syncMods(gameDir, manifest, settings, onStatus);
 
   onStatus('Verifico i file di Minecraft ' + manifest.minecraft + '…');
@@ -390,7 +404,8 @@ async function launchGame({ gameDir, manifest, authorization, settings, onStatus
   const opts = {
     authorization,
     root: gameDir,
-    javaPath: javaExe,
+    javaPath: java.executable,
+    customArgs: runtime.customArgs,
     version: {
       number: manifest.minecraft,
       type: 'release',
@@ -401,6 +416,7 @@ async function launchGame({ gameDir, manifest, authorization, settings, onStatus
       min: `${Math.min(2048, maxRam)}M`,
     },
     overrides: {
+      ...runtime.overrides,
       // Il gioco sopravvive se il giocatore chiude il launcher.
       detached: true,
     },
@@ -412,7 +428,13 @@ async function launchGame({ gameDir, manifest, authorization, settings, onStatus
       identifier: `${manifest.server.host}:${manifest.server.port || 25565}`,
     };
   }
-  launcher.launch(opts);
+  setImmediate(async () => {
+    let closed = false;
+    launcher.once('close', () => { closed = true; });
+    const child = await launcher.launch(opts);
+    if (child) child.on('error', (error) => console.warn('Avvio Java:', error.message));
+    else if (!closed) launcher.emit('close', 1);
+  });
   return launcher;
 }
 
@@ -428,10 +450,10 @@ async function launchGame({ gameDir, manifest, authorization, settings, onStatus
  *  - lascia intatti mondi, opzioni, shaderpack e resourcepack.
  * Non lancia mai: ritorna un riepilogo di cosa e` stato fatto.
  */
-function resetMods(gameDir) {
+function resetMods(gameDir, manifest) {
   const out = { ok: true, removed: 0, backedUp: 0, backupDir: null, errors: [] };
   const modsDir = path.join(gameDir, 'mods');
-  const customDir = path.join(gameDir, 'mods-custom');
+  const customDir = customModsDirectory(gameDir, manifest.minecraft);
 
   // 1) backup delle mod personali
   try {
@@ -481,5 +503,5 @@ function resetMods(gameDir) {
 module.exports = {
   getManifest, ensureJava, ensureFabric, syncMods, seedGameFiles, launchGame,
   javaPlatform, computeAutoRam, platformKey, supportsPlatform, platformMods, platformOptionalMods,
-  resetMods,
+  customModsDirectory, resetMods,
 };
